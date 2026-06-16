@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Lock, Mail, Clock, ArrowRight, Shield, Video, HelpCircle } from 'lucide-react';
+import { Check, Lock, Mail, Clock, ArrowRight, Shield, Video, HelpCircle, Phone } from 'lucide-react';
 import MeetingRoom from './components/MeetingRoom';
 import AdminDashboard from './components/AdminDashboard';
 
@@ -138,8 +138,48 @@ export default function App() {
         </div>
       </nav>
 
+      {/* About Us Section */}
+      <section id="about" className="about-us-section" style={{ paddingTop: '11rem' }}>
+        <div className="container">
+          <div className="about-us-grid">
+            <section className="company-info-section">
+              <div className="premium-badge">
+                <span className="badge-pulse"></span> Virtual Advisory Workspace
+              </div>
+              <h2 className="company-title">
+                Strategic Consulting & <span className="text-glow">Growth Advising</span>
+              </h2>
+              <p className="company-description">
+                We partner with high-growth businesses and premium service providers to engineer client acquisition infrastructure, optimize service delivery, and streamline operations. 
+              </p>
+              
+              <div className="feature-bullets">
+                <div className="feature-bullet-item">
+                  <div className="bullet-icon-check">
+                    <Check size={14} strokeWidth={3} />
+                  </div>
+                  <span><strong>Expert Consultation:</strong> 1-on-1 private deep dives with certified advisors.</span>
+                </div>
+                <div className="feature-bullet-item">
+                  <div className="bullet-icon-check">
+                    <Check size={14} strokeWidth={3} />
+                  </div>
+                  <span><strong>Live Workspace:</strong> High-performance virtual meeting environment with interactive roadmap tracking.</span>
+                </div>
+                <div className="feature-bullet-item">
+                  <div className="bullet-icon-check">
+                    <Check size={14} strokeWidth={3} />
+                  </div>
+                  <span><strong>Tailored Strategy:</strong> Custom growth blueprints designed around your specific bottlenecks.</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
       {/* Hero / Join Call Portal Section */}
-      <main id="join-session" className="portal-hero">
+      <main id="join-session" className="portal-hero" style={{ paddingTop: '6rem', paddingBottom: '7.5rem' }}>
         <div className="container">
           <div className="portal-join-layout">
             <section className="join-session-container">
@@ -186,46 +226,6 @@ export default function App() {
         </div>
       </main>
 
-      {/* About Us Section */}
-      <section id="about" className="about-us-section">
-        <div className="container">
-          <div className="about-us-grid">
-            <section className="company-info-section">
-              <div className="premium-badge">
-                <span className="badge-pulse"></span> Virtual Advisory Workspace
-              </div>
-              <h2 className="company-title">
-                Strategic Consulting & <span className="text-glow">Growth Advising</span>
-              </h2>
-              <p className="company-description">
-                We partner with high-growth businesses and premium service providers to engineer client acquisition infrastructure, optimize service delivery, and streamline operations. 
-              </p>
-              
-              <div className="feature-bullets">
-                <div className="feature-bullet-item">
-                  <div className="bullet-icon-check">
-                    <Check size={14} strokeWidth={3} />
-                  </div>
-                  <span><strong>Expert Consultation:</strong> 1-on-1 private deep dives with certified advisors.</span>
-                </div>
-                <div className="feature-bullet-item">
-                  <div className="bullet-icon-check">
-                    <Check size={14} strokeWidth={3} />
-                  </div>
-                  <span><strong>Live Workspace:</strong> High-performance virtual meeting environment with interactive roadmap tracking.</span>
-                </div>
-                <div className="feature-bullet-item">
-                  <div className="bullet-icon-check">
-                    <Check size={14} strokeWidth={3} />
-                  </div>
-                  <span><strong>Tailored Strategy:</strong> Custom growth blueprints designed around your specific bottlenecks.</span>
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="footer">
         <div className="container">
@@ -235,7 +235,7 @@ export default function App() {
                 <img src="/Logo1.png" alt="Logo" />
               </a>
               <p className="footer-desc">
-                Engineering premium client acquisition frameworks and scaling operations for B2B brands.
+                Architecting custom customer acquisition engines and scaling operations for high-ticket service brands.
               </p>
             </div>
             
@@ -251,23 +251,14 @@ export default function App() {
             <div>
               <h4 className="footer-links-title">Get In Touch</h4>
               <div className="footer-contact-item">
-                <Mail size={16} style={{ color: 'var(--color-yellow-accent)' }} />
-                <span>support@digitalguru.academy</span>
-              </div>
-              <div className="footer-contact-item">
-                <Clock size={16} style={{ color: 'var(--color-yellow-accent)' }} />
-                <span>Mon - Sat: 10:00 AM - 7:00 PM IST</span>
+                <Phone size={16} style={{ color: 'var(--color-yellow-accent)' }} />
+                <span>+91 8825948859</span>
               </div>
             </div>
           </div>
 
           <div className="footer-bottom">
             <p>&copy; 2026. All Rights Reserved. Designed for professional results.</p>
-            <div className="footer-socials">
-              <a href="#" className="social-icon" aria-label="Facebook">FB</a>
-              <a href="#" className="social-icon" aria-label="Twitter">TW</a>
-              <a href="#" className="social-icon" aria-label="LinkedIn">LI</a>
-            </div>
           </div>
         </div>
       </footer>
