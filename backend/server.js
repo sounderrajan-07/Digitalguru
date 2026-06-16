@@ -51,6 +51,14 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Vercel path rewriting middleware for prefix compatibility
+app.use((req, res, next) => {
+  if (!req.url.startsWith('/api') && !req.url.includes('.')) {
+    req.url = '/api' + req.url;
+  }
+  next();
+});
+
 // Master list of time slots
 const MASTER_SLOTS = [
   '10:00 AM',
