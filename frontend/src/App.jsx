@@ -139,7 +139,7 @@ export default function App() {
       </nav>
 
       {/* About Us Section */}
-      <section id="about" className="about-us-section" style={{ paddingTop: '11rem' }}>
+      <section id="about" className="about-us-section">
         <div className="container">
           <div className="about-us-grid">
             <section className="company-info-section">

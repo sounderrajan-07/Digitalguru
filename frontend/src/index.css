@@ -1780,7 +1780,7 @@ img {
 }
 
 .about-us-section {
-  padding: 6.5rem 0;
+  padding: 10rem 0 6.5rem 0;
   background-color: #ffffff;
   border-top: 1px solid rgba(0, 0, 0, 0.04);
 }
@@ -2175,6 +2175,10 @@ img {
 
 /* Responsive Styles */
 @media (max-width: 1024px) {
+  .about-us-section {
+    padding: 7rem 0 4rem 0;
+  }
+
   .about-us-grid {
     grid-template-columns: 1fr;
     gap: 3.5rem;
@@ -2289,6 +2293,26 @@ img {
 }
 
 @media (max-width: 768px) {
+  .about-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+  }
+
+  .metric-box {
+    padding: 1.25rem;
+  }
+
+  .about-trust-card {
+    padding: 1.25rem;
+  }
+
+  .about-quote {
+    font-size: 1.1rem;
+    padding-left: 1.25rem;
+  }
+
   .container {
     padding: 0 1.25rem;
   }
