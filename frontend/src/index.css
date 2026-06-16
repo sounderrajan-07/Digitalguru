@@ -1764,14 +1764,179 @@ img {
 }
 
 .about-us-grid {
-  max-width: 1000px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 4.5rem;
+  max-width: 1200px;
   margin: 0 auto;
+  align-items: start;
 }
 
 .company-info-section {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+
+/* About Section Quote & Trust Card */
+.about-quote {
+  border-left: 4px solid var(--color-blue-brand);
+  padding: 0.5rem 0 0.5rem 1.5rem;
+  font-style: italic;
+  font-size: 1.25rem;
+  color: var(--text-dark);
+  margin: 1.5rem 0 2rem 0;
+  font-weight: 500;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.about-trust-card {
+  background: rgba(248, 250, 252, 0.6);
+  border: 1px solid rgba(0, 123, 255, 0.12);
+  border-radius: var(--border-radius-sm);
+  padding: 1.75rem;
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  transition: var(--transition);
+}
+
+.about-trust-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 123, 255, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 123, 255, 0.05);
+}
+
+.trust-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.trust-icon {
+  flex-shrink: 0;
+}
+
+.trust-card-header h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.trust-card-text {
+  font-size: 0.95rem !important;
+  color: var(--text-muted) !important;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  padding: 0.4rem 0.8rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge-icon {
+  flex-shrink: 0;
+}
+
+/* Pedagogy & Metrics styles */
+.pedagogy-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding-top: 5rem;
+}
+
+.pedagogy-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 2.5rem;
+}
+
+.pedagogy-icon-wrapper {
+  background-color: rgba(0, 123, 255, 0.08) !important;
+  color: var(--color-blue-brand) !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+}
+
+.pedagogy-text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pedagogy-item-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.pedagogy-item-desc {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.about-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  width: 100%;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.metric-box {
+  background-color: #f8fafc;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: var(--border-radius-sm);
+  padding: 1.5rem;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.metric-box:hover {
+  background-color: #ffffff;
+  border-color: rgba(0, 123, 255, 0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.03);
+}
+
+.metric-number {
+  display: block;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--color-blue-brand);
+  line-height: 1.2;
+  margin-bottom: 0.35rem;
+  background: linear-gradient(135deg, var(--color-blue-brand), var(--color-orange-brand));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.metric-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .premium-badge {
@@ -1987,6 +2152,30 @@ img {
 
 /* Responsive Styles */
 @media (max-width: 1024px) {
+  .about-us-grid {
+    grid-template-columns: 1fr;
+    gap: 3.5rem;
+  }
+
+  .pedagogy-section {
+    align-items: center;
+    text-align: center;
+    padding-top: 2rem;
+  }
+
+  .pedagogy-title {
+    text-align: center;
+  }
+
+  .pedagogy-text-content {
+    text-align: left;
+  }
+
+  .about-quote {
+    max-width: 600px;
+    margin: 1.5rem auto 2rem auto;
+  }
+
   .portal-grid {
     grid-template-columns: 1fr;
     gap: 4rem;
@@ -1998,7 +2187,7 @@ img {
   }
 
   .company-description {
-    margin: 0 auto 2.5rem auto;
+    margin: 0 auto 1.5rem auto;
   }
 
   .feature-bullets {

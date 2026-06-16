@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Lock, Mail, Clock, ArrowRight, Shield, Video, HelpCircle, Phone } from 'lucide-react';
+import { Check, Lock, Mail, Clock, ArrowRight, Shield, Video, HelpCircle, Phone, Award, CheckCircle, GraduationCap, Briefcase } from 'lucide-react';
 import MeetingRoom from './components/MeetingRoom';
 import AdminDashboard from './components/AdminDashboard';
 
@@ -144,33 +144,78 @@ export default function App() {
           <div className="about-us-grid">
             <section className="company-info-section">
               <div className="premium-badge">
-                <span className="badge-pulse"></span> Virtual Advisory Workspace
+                <span className="badge-pulse"></span> About Digital Guru
               </div>
               <h2 className="company-title">
-                Strategic Consulting & <span className="text-glow">Growth Advising</span>
+                Empowering Careers with <span className="text-glow">Jai Ghurudeva Academy</span>
               </h2>
               <p className="company-description">
-                We partner with high-growth businesses and premium service providers to engineer client acquisition infrastructure, optimize service delivery, and streamline operations. 
+                Started in 2018, Jai Ghurudeva Academy (now Digital Guru) was founded with a singular vision: to bridge the gap between traditional education and the rapidly evolving demands of the digital economy.
               </p>
+              <p className="company-description" style={{ marginTop: '-1.5rem' }}>
+                We recognized early on that tools change, but fundamental marketing psychology and strategic thinking remain constant. Today, we infuse every lesson with AI to make our students 10x more productive.
+              </p>
+              
+              <blockquote className="about-quote">
+                "We don't just teach tools; we cultivate the mindset of a digital artisan."
+              </blockquote>
+
+              <div className="about-trust-card glass-card">
+                <div className="trust-card-header">
+                  <Award className="trust-icon" size={20} color="var(--color-blue-brand)" />
+                  <h4>Jai Ghurudeva Academy Private Limited</h4>
+                </div>
+                <p className="trust-card-text">
+                  Digital Guru is owned and operated by Jai Ghurudeva Academy. We partner with top brands and marketing heads to ensure our curriculum meets the highest quality standards globally.
+                </p>
+                <div className="trust-badge">
+                  <CheckCircle className="badge-icon" size={16} />
+                  <span>Registered Educational Trust</span>
+                </div>
+              </div>
+            </section>
+
+            <section className="pedagogy-section">
+              <h3 className="pedagogy-title">Foundations of Our Pedagogy</h3>
               
               <div className="feature-bullets">
                 <div className="feature-bullet-item">
-                  <div className="bullet-icon-check">
-                    <Check size={14} strokeWidth={3} />
+                  <div className="bullet-icon-check pedagogy-icon-wrapper">
+                    <Award size={16} strokeWidth={2.5} />
                   </div>
-                  <span><strong>Expert Consultation:</strong> 1-on-1 private deep dives with certified advisors.</span>
+                  <div className="pedagogy-text-content">
+                    <span className="pedagogy-item-title">Excellence</span>
+                    <p className="pedagogy-item-desc">We uphold the highest standards of academic rigor, ensuring every lesson is both relevant and masterly.</p>
+                  </div>
                 </div>
                 <div className="feature-bullet-item">
-                  <div className="bullet-icon-check">
-                    <Check size={14} strokeWidth={3} />
+                  <div className="bullet-icon-check pedagogy-icon-wrapper">
+                    <GraduationCap size={16} strokeWidth={2.5} />
                   </div>
-                  <span><strong>Live Workspace:</strong> High-performance virtual meeting environment with interactive roadmap tracking.</span>
+                  <div className="pedagogy-text-content">
+                    <span className="pedagogy-item-title">Student First</span>
+                    <p className="pedagogy-item-desc">Our mentors prioritize individual growth, adapting their methods to each student's unique learning curve.</p>
+                  </div>
                 </div>
                 <div className="feature-bullet-item">
-                  <div className="bullet-icon-check">
-                    <Check size={14} strokeWidth={3} />
+                  <div className="bullet-icon-check pedagogy-icon-wrapper">
+                    <Briefcase size={16} strokeWidth={2.5} />
                   </div>
-                  <span><strong>Tailored Strategy:</strong> Custom growth blueprints designed around your specific bottlenecks.</span>
+                  <div className="pedagogy-text-content">
+                    <span className="pedagogy-item-title">Real-World Focus</span>
+                    <p className="pedagogy-item-desc">Education that translates directly into professional impact, driven by live briefs, case studies, and real projects.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="about-metrics-grid">
+                <div className="metric-box">
+                  <span className="metric-number">5,000+</span>
+                  <span className="metric-label">Students Placed Globally</span>
+                </div>
+                <div className="metric-box">
+                  <span className="metric-number">100%</span>
+                  <span className="metric-label">AI-Infused Curriculum</span>
                 </div>
               </div>
             </section>
