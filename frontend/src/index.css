@@ -1667,6 +1667,15 @@ img {
   margin-bottom: 0.85rem;
 }
 
+.footer-contact-item a {
+  color: inherit;
+  transition: var(--transition);
+}
+
+.footer-contact-item a:hover {
+  color: var(--color-yellow-accent);
+}
+
 .footer-contact-icon {
   color: var(--color-yellow-accent);
 }

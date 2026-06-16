@@ -295,9 +295,13 @@ export default function App() {
 
             <div>
               <h4 className="footer-links-title">Get In Touch</h4>
+              <div className="footer-contact-item" style={{ marginBottom: '0.75rem' }}>
+                <Phone size={16} style={{ color: 'var(--color-yellow-accent)', flexShrink: 0 }} />
+                <a href="tel:+918825948859">+91 8825948859</a>
+              </div>
               <div className="footer-contact-item">
-                <Phone size={16} style={{ color: 'var(--color-yellow-accent)' }} />
-                <span>+91 8825948859</span>
+                <Mail size={16} style={{ color: 'var(--color-yellow-accent)', flexShrink: 0 }} />
+                <a href="mailto:info@digitalghuru.in">info@digitalghuru.in</a>
               </div>
             </div>
           </div>
