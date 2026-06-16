@@ -2048,6 +2048,7 @@ img {
 
 .join-session-container {
   position: relative;
+  overflow: hidden;
 }
 
 .join-card {
@@ -2311,7 +2312,7 @@ img {
     text-align: center;
   }
 
-  .join-session-card {
+  .join-card {
     padding: 1.75rem;
   }
 
