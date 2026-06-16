@@ -18,24 +18,6 @@
     "createdAt": "2026-06-15T11:27:39.581Z"
   },
   {
-    "id": "byd-z9p9-608",
-    "name": "Soundher S",
-    "email": "soundhersenthil07@gmail.com",
-    "phone": "739752379",
-    "businessType": "agency",
-    "goal": "hello",
-    "date": "2026-06-15",
-    "time": "10:00 AM",
-    "zoomLink": "http://localhost:5173/?meet=byd-z9p9-608",
-    "notes": "",
-    "roadmapProgress": {
-      "offerAudit": false,
-      "trustFunnel": false,
-      "salesScripts": false
-    },
-    "createdAt": "2026-06-15T11:45:41.585Z"
-  },
-  {
     "id": "inst-9nfx-93gl",
     "name": "Sir",
     "email": "",

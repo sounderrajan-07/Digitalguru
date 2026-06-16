@@ -147,10 +147,10 @@ export default function App() {
                 <span className="badge-pulse"></span> About Digital Guru
               </div>
               <h2 className="company-title">
-                Empowering Careers with <span className="text-glow">Jai Ghurudeva Academy</span>
+                Empowering Careers with <span className="text-glow">Digital Guru</span>
               </h2>
               <p className="company-description">
-                Started in 2018, Jai Ghurudeva Academy (now Digital Guru) was founded with a singular vision: to bridge the gap between traditional education and the rapidly evolving demands of the digital economy.
+                Started in 2018, Digital Guru was founded with a singular vision: to bridge the gap between traditional education and the rapidly evolving demands of the digital economy.
               </p>
               <p className="company-description" style={{ marginTop: '-1.5rem' }}>
                 We recognized early on that tools change, but fundamental marketing psychology and strategic thinking remain constant. Today, we infuse every lesson with AI to make our students 10x more productive.
@@ -163,10 +163,10 @@ export default function App() {
               <div className="about-trust-card glass-card">
                 <div className="trust-card-header">
                   <Award className="trust-icon" size={20} color="var(--color-blue-brand)" />
-                  <h4>Jai Ghurudeva Academy Private Limited</h4>
+                  <h4>Digital Guru Private Limited</h4>
                 </div>
                 <p className="trust-card-text">
-                  Digital Guru is owned and operated by Jai Ghurudeva Academy. We partner with top brands and marketing heads to ensure our curriculum meets the highest quality standards globally.
+                  Digital Guru is owned and operated by Digital Guru Private Limited. We partner with top brands and marketing heads to ensure our curriculum meets the highest quality standards globally.
                 </p>
                 <div className="trust-badge">
                   <CheckCircle className="badge-icon" size={16} />
