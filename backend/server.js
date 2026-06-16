@@ -401,6 +401,25 @@ app.get('/api/admin/bookings', (req, res) => {
   res.json(sortedBookings);
 });
 
+// API: Delete a booking/meeting log
+app.delete('/api/admin/bookings/:id', (req, res) => {
+  const { id } = req.params;
+  const bookings = readBookings();
+  const index = bookings.findIndex(b => b.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Booking log not found' });
+  }
+
+  bookings.splice(index, 1);
+  if (writeBookings(bookings)) {
+    console.log(`[Success] Deleted booking log ID: ${id}`);
+    res.json({ success: true, message: 'Booking log deleted successfully' });
+  } else {
+    res.status(500).json({ error: 'Failed to delete booking log' });
+  }
+});
+
 // Export app for serverless environment
 export default app;
 

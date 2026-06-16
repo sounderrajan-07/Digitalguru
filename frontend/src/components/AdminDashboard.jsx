@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, BookOpen, Users, Zap, RefreshCw, ArrowLeft, Key, Save, Lock, MessageSquare } from 'lucide-react';
+import { Calendar, BookOpen, Users, Zap, RefreshCw, ArrowLeft, Key, Save, Lock, MessageSquare, Trash2 } from 'lucide-react';
 import './AdminDashboard.css';
 
 export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
@@ -129,6 +129,27 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
   const handleLaunchInstantMeet = () => {
     if (generatedMeetId) {
       onStartMeeting(generatedMeetId);
+    }
+  };
+
+  // Delete a booking log
+  const handleDeleteBooking = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this meeting log? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      const res = await fetch(`${apiBaseUrl}/admin/bookings/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setBookings(prev => prev.filter(b => b.id !== id));
+      } else {
+        const errData = await res.json();
+        alert(errData.error || 'Failed to delete meeting log.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error connecting to the server to delete.');
     }
   };
 
@@ -431,6 +452,14 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
 
                         {/* Booking Item Footer Actions */}
                         <div className="booking-actions">
+                          <button
+                            onClick={() => handleDeleteBooking(booking.id)}
+                            className="btn btn-danger action-btn-sm"
+                            style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                          >
+                            <Trash2 size={14} />
+                            <span>Delete</span>
+                          </button>
                           {hasNotes && !isExpanded && (
                             <button
                               onClick={() => setExpandedNotesId(booking.id)}

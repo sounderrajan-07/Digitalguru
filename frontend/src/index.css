@@ -221,6 +221,19 @@ img {
   transform: translateY(-2px);
 }
 
+.btn-danger {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+}
+
+
 /* Badge System */
 .badge {
   display: inline-flex;
