@@ -1,0 +1,14 @@
+# Ignore dependency directories
+node_modules/
+**/node_modules/
+
+# Ignore builds
+dist/
+**/dist/
+.vercel/
+
+# Ignore environment variables & local config
+.env
+.env.local
+.env.*.local
+.DS_Store

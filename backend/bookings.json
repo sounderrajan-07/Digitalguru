@@ -1,0 +1,92 @@
+[
+  {
+    "id": "test-id",
+    "name": "Instant Guest",
+    "email": "",
+    "phone": "",
+    "businessType": "instant",
+    "goal": "Instant 1-on-1 Consultation",
+    "date": "2026-06-15",
+    "time": "04:57 PM",
+    "zoomLink": "http://localhost:5173/?meet=test-id",
+    "notes": "Hello World!",
+    "roadmapProgress": {
+      "offerAudit": false,
+      "trustFunnel": false,
+      "salesScripts": false
+    },
+    "createdAt": "2026-06-15T11:27:39.581Z"
+  },
+  {
+    "id": "byd-z9p9-608",
+    "name": "Soundher S",
+    "email": "soundhersenthil07@gmail.com",
+    "phone": "739752379",
+    "businessType": "agency",
+    "goal": "hello",
+    "date": "2026-06-15",
+    "time": "10:00 AM",
+    "zoomLink": "http://localhost:5173/?meet=byd-z9p9-608",
+    "notes": "",
+    "roadmapProgress": {
+      "offerAudit": false,
+      "trustFunnel": false,
+      "salesScripts": false
+    },
+    "createdAt": "2026-06-15T11:45:41.585Z"
+  },
+  {
+    "id": "inst-9nfx-93gl",
+    "name": "Sir",
+    "email": "",
+    "phone": "",
+    "businessType": "instant",
+    "goal": "Instant 1-on-1 Consultation",
+    "date": "2026-06-16",
+    "time": "10:47 AM",
+    "zoomLink": "http://localhost:5173/?meet=inst-9nfx-93gl",
+    "notes": "",
+    "roadmapProgress": {
+      "offerAudit": false,
+      "trustFunnel": false,
+      "salesScripts": false
+    },
+    "createdAt": "2026-06-16T05:17:13.058Z"
+  },
+  {
+    "id": "inst-33bz-4qa2",
+    "name": "Sir",
+    "email": "",
+    "phone": "",
+    "businessType": "instant",
+    "goal": "Instant 1-on-1 Consultation",
+    "date": "2026-06-16",
+    "time": "11:29 AM",
+    "zoomLink": "http://localhost:5173/?meet=inst-33bz-4qa2",
+    "notes": "",
+    "roadmapProgress": {
+      "offerAudit": true,
+      "trustFunnel": true,
+      "salesScripts": false
+    },
+    "createdAt": "2026-06-16T05:59:01.755Z"
+  },
+  {
+    "id": "inst-uln6-6cu3",
+    "name": "Sir",
+    "email": "",
+    "phone": "",
+    "businessType": "instant",
+    "goal": "Instant 1-on-1 Consultation",
+    "date": "2026-06-16",
+    "time": "12:03 PM",
+    "zoomLink": "http://localhost:5173/?meet=inst-uln6-6cu3",
+    "notes": "hello world",
+    "roadmapProgress": {
+      "offerAudit": true,
+      "trustFunnel": true,
+      "salesScripts": false
+    },
+    "createdAt": "2026-06-16T06:33:54.006Z"
+  }
+]
