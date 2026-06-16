@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Check, Lock, Mail, Clock, ArrowRight, Shield, Video, HelpCircle } from 'lucide-react';
 import MeetingRoom from './components/MeetingRoom';
 import AdminDashboard from './components/AdminDashboard';
 
@@ -95,7 +96,18 @@ export default function App() {
   };
 
   if (currentMeetId) {
-    return <MeetingRoom meetId={currentMeetId} onLeave={navigateToHome} />;
+    return (
+      <MeetingRoom 
+        meetId={currentMeetId} 
+        onLeave={(wasHost) => {
+          if (wasHost) {
+            navigateToAdmin();
+          } else {
+            navigateToHome();
+          }
+        }} 
+      />
+    );
   }
 
   if (isAdminView) {
@@ -126,44 +138,15 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Main Content Portal */}
-      <main className="portal-hero">
+      {/* Hero / Join Call Portal Section */}
+      <main id="join-session" className="portal-hero">
         <div className="container">
-          <div className="portal-grid">
-            {/* Left Column: About Company */}
-            <section id="about" className="company-info-section">
-              <div className="premium-badge">
-                <span className="badge-pulse"></span> Virtual Advisory Workspace
-              </div>
-              <h1 className="company-title">
-                Strategic Consulting & <span className="text-glow">Growth Advising</span>
-              </h1>
-              <p className="company-description">
-                We partner with high-growth businesses and premium service providers to engineer client acquisition infrastructure, optimize service delivery, and streamline operations. 
-              </p>
-              
-              <div className="feature-bullets">
-                <div className="feature-bullet-item">
-                  <span className="bullet-icon-check">✓</span>
-                  <span><strong>Expert Consultation:</strong> 1-on-1 private deep dives with certified advisors.</span>
-                </div>
-                <div className="feature-bullet-item">
-                  <span className="bullet-icon-check">✓</span>
-                  <span><strong>Live Workspace:</strong> High-performance virtual meeting environment with interactive roadmap tracking.</span>
-                </div>
-                <div className="feature-bullet-item">
-                  <span className="bullet-icon-check">✓</span>
-                  <span><strong>Tailored Strategy:</strong> Custom growth blueprints designed around your specific bottlenecks.</span>
-                </div>
-              </div>
-            </section>
-
-            {/* Right Column: Join Call Portal */}
-            <section id="join-session" className="join-session-container">
+          <div className="portal-join-layout">
+            <section className="join-session-container">
               <div className="join-card glass-card floating-effect">
                 <div className="join-card-header">
                   <div className="video-icon-wrapper">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                    <Video size={24} color="var(--color-blue-brand)" />
                   </div>
                   <h3>Join Your Session</h3>
                 </div>
@@ -188,12 +171,13 @@ export default function App() {
 
                   <button type="submit" className="btn btn-primary btn-full-width">
                     Join Secure Session
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    <ArrowRight size={18} style={{ marginLeft: '0.5rem' }} />
                   </button>
                 </form>
 
                 <div className="join-security-notice">
-                  <span className="lock-icon-svg">🔒</span> End-to-end encrypted video workspace
+                  <Shield size={14} style={{ color: 'var(--color-blue-brand)' }} />
+                  <span>End-to-end encrypted video workspace</span>
                 </div>
               </div>
               <div className="portal-visual-glow"></div>
@@ -201,6 +185,46 @@ export default function App() {
           </div>
         </div>
       </main>
+
+      {/* About Us Section */}
+      <section id="about" className="about-us-section">
+        <div className="container">
+          <div className="about-us-grid">
+            <section className="company-info-section">
+              <div className="premium-badge">
+                <span className="badge-pulse"></span> Virtual Advisory Workspace
+              </div>
+              <h2 className="company-title">
+                Strategic Consulting & <span className="text-glow">Growth Advising</span>
+              </h2>
+              <p className="company-description">
+                We partner with high-growth businesses and premium service providers to engineer client acquisition infrastructure, optimize service delivery, and streamline operations. 
+              </p>
+              
+              <div className="feature-bullets">
+                <div className="feature-bullet-item">
+                  <div className="bullet-icon-check">
+                    <Check size={14} strokeWidth={3} />
+                  </div>
+                  <span><strong>Expert Consultation:</strong> 1-on-1 private deep dives with certified advisors.</span>
+                </div>
+                <div className="feature-bullet-item">
+                  <div className="bullet-icon-check">
+                    <Check size={14} strokeWidth={3} />
+                  </div>
+                  <span><strong>Live Workspace:</strong> High-performance virtual meeting environment with interactive roadmap tracking.</span>
+                </div>
+                <div className="feature-bullet-item">
+                  <div className="bullet-icon-check">
+                    <Check size={14} strokeWidth={3} />
+                  </div>
+                  <span><strong>Tailored Strategy:</strong> Custom growth blueprints designed around your specific bottlenecks.</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="footer">
@@ -227,11 +251,11 @@ export default function App() {
             <div>
               <h4 className="footer-links-title">Get In Touch</h4>
               <div className="footer-contact-item">
-                <span className="footer-contact-icon">✉</span>
+                <Mail size={16} style={{ color: 'var(--color-yellow-accent)' }} />
                 <span>support@digitalguru.academy</span>
               </div>
               <div className="footer-contact-item">
-                <span className="footer-contact-icon">⏰</span>
+                <Clock size={16} style={{ color: 'var(--color-yellow-accent)' }} />
                 <span>Mon - Sat: 10:00 AM - 7:00 PM IST</span>
               </div>
             </div>

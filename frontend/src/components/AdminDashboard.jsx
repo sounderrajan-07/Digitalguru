@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Calendar, BookOpen, Users, Zap, RefreshCw, ArrowLeft, Key, Save, Lock, MessageSquare } from 'lucide-react';
 import './AdminDashboard.css';
 
 export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
@@ -13,18 +14,64 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
   const [generatedMeetId, setGeneratedMeetId] = useState('');
   const [expandedNotesId, setExpandedNotesId] = useState(null);
 
+  // Passcode change states
+  const [currentPasscode, setCurrentPasscode] = useState('');
+  const [newPasscode, setNewPasscode] = useState('');
+  const [passcodeSuccess, setPasscodeSuccess] = useState('');
+  const [passcodeErr, setPasscodeErr] = useState('');
+  const [updatingPasscode, setUpdatingPasscode] = useState(false);
+
   const apiBaseUrl = window.location.origin.includes('localhost:5173')
     ? 'http://localhost:5000/api'
     : '/api';
 
   // Verify PIN
-  const handlePinSubmit = (e) => {
+  const handlePinSubmit = async (e) => {
     e.preventDefault();
-    if (pinCode === '1234' || pinCode.toLowerCase() === 'guru123') {
-      setIsAuthenticated(true);
-      setPinError('');
-    } else {
-      setPinError('Invalid Passcode. Access Denied.');
+    try {
+      const res = await fetch(`${apiBaseUrl}/auth/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode: pinCode })
+      });
+      if (res.ok) {
+        setIsAuthenticated(true);
+        setPinError('');
+      } else {
+        const errData = await res.json();
+        setPinError(errData.error || 'Invalid Passcode. Access Denied.');
+      }
+    } catch (err) {
+      console.error(err);
+      setPinError('Server error verifying passcode.');
+    }
+  };
+
+  // Change Passcode
+  const handleChangePasscode = async (e) => {
+    e.preventDefault();
+    setUpdatingPasscode(true);
+    setPasscodeSuccess('');
+    setPasscodeErr('');
+    try {
+      const res = await fetch(`${apiBaseUrl}/auth/change-passcode`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPasscode, newPasscode })
+      });
+      if (res.ok) {
+        setPasscodeSuccess('Passcode updated successfully!');
+        setCurrentPasscode('');
+        setNewPasscode('');
+      } else {
+        const errData = await res.json();
+        setPasscodeErr(errData.error || 'Failed to update passcode.');
+      }
+    } catch (err) {
+      console.error(err);
+      setPasscodeErr('Server connection error.');
+    } finally {
+      setUpdatingPasscode(false);
     }
   };
 
@@ -44,9 +91,27 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchBookings();
-    }
+    if (!isAuthenticated) return;
+
+    fetchBookings();
+
+    // Poll logs every 10 seconds silently
+    const interval = setInterval(() => {
+      const fetchBookingsSilent = async () => {
+        try {
+          const res = await fetch(`${apiBaseUrl}/admin/bookings`);
+          if (res.ok) {
+            const data = await res.json();
+            setBookings(data || []);
+          }
+        } catch (err) {
+          console.error('Silent fetch failed:', err);
+        }
+      };
+      fetchBookingsSilent();
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, [isAuthenticated]);
 
   // Generate an instant meeting room ID and URL
@@ -122,15 +187,17 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
         {/* Dashboard Header */}
         <header className="admin-header">
           <div className="admin-title-group">
-            <h1>Sir's Meeting Dashboard</h1>
+            <h1>Host's Meeting Dashboard</h1>
             <p>Host instant 1-on-1 strategy sessions or view scheduled consultations.</p>
           </div>
           <div style={{ display: 'flex', gap: '1rem' }}>
-            <button onClick={fetchBookings} className="btn btn-secondary" style={{ padding: '0.75rem 1.5rem' }}>
-              🔄 Refresh
+            <button onClick={fetchBookings} className="btn btn-secondary" style={{ padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <RefreshCw size={16} />
+              <span>Refresh</span>
             </button>
-            <button onClick={onBackToHome} className="btn btn-primary" style={{ padding: '0.75rem 1.5rem' }}>
-              Back to Website
+            <button onClick={onBackToHome} className="btn btn-primary" style={{ padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ArrowLeft size={16} />
+              <span>Back to Website</span>
             </button>
           </div>
         </header>
@@ -138,28 +205,36 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
         {/* Analytics Statistics */}
         <section className="metrics-grid">
           <div className="metric-card">
-            <div className="metric-icon">📅</div>
+            <div className="metric-icon">
+              <Calendar size={24} color="var(--color-blue-brand)" />
+            </div>
             <div className="metric-info">
               <h3>{totalBookings}</h3>
               <p>Total Consultations</p>
             </div>
           </div>
           <div className="metric-card">
-            <div className="metric-icon">💡</div>
+            <div className="metric-icon">
+              <BookOpen size={24} color="var(--color-blue-brand)" />
+            </div>
             <div className="metric-info">
               <h3>{completedSessions}</h3>
               <p>Notes Completed</p>
             </div>
           </div>
           <div className="metric-card">
-            <div className="metric-icon">👥</div>
+            <div className="metric-icon">
+              <Users size={24} color="var(--color-blue-brand)" />
+            </div>
             <div className="metric-info">
               <h3>{scheduledMeets}</h3>
               <p>Website Bookings</p>
             </div>
           </div>
           <div className="metric-card">
-            <div className="metric-icon">⚡</div>
+            <div className="metric-icon">
+              <Zap size={24} color="var(--color-blue-brand)" />
+            </div>
             <div className="metric-info">
               <h3>{instantMeets}</h3>
               <p>Instant Launches</p>
@@ -170,72 +245,115 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
         {/* Dashboard Main Grid */}
         <div className="dashboard-grid">
           
-          {/* Left Column: Generate Instant Meet */}
-          <aside className="admin-card">
-            <h2 className="admin-card-title">Host Instant Session</h2>
-            <p style={{ color: 'var(--text-light-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-              Create a custom meeting room on the spot to invite standard leads, students, or guest partners immediately.
-            </p>
-            
-            <form onSubmit={handleGenerateInstantMeet} className="instant-meet-form">
-              <div className="form-group" style={{ margin: 0 }}>
-                <label htmlFor="guest-name">Guest's Full Name (Optional)</label>
-                <input
-                  type="text"
-                  id="guest-name"
-                  value={instantGuestName}
-                  onChange={(e) => setInstantGuestName(e.target.value)}
-                  className="form-input lobby-input-dark"
-                  placeholder="e.g. Rahul Sharma"
-                />
-              </div>
+          {/* Left Column: Generate Instant Meet & Security Settings */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <aside className="admin-card">
+              <h2 className="admin-card-title">Host Instant Session</h2>
+              <p style={{ color: 'var(--text-light-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Create a custom meeting room on the spot to invite standard leads, students, or guest partners immediately.
+              </p>
               
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-                Create Meeting Room
-              </button>
-            </form>
-
-            {generatedLink && (
-              <div className="generated-link-box">
-                <div className="generated-link-header">Invitation Link Generated</div>
-                <div className="link-input-group">
+              <form onSubmit={handleGenerateInstantMeet} className="instant-meet-form">
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label htmlFor="guest-name">Guest's Full Name (Optional)</label>
                   <input
                     type="text"
-                    readOnly
-                    value={generatedLink}
-                    className="admin-input-dark"
+                    id="guest-name"
+                    value={instantGuestName}
+                    onChange={(e) => setInstantGuestName(e.target.value)}
+                    className="form-input lobby-input-dark"
+                    placeholder="e.g. Rahul Sharma"
                   />
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(generatedLink);
-                      alert('Invitation link copied!');
-                    }}
-                    className="copy-btn-mini"
-                  >
-                    Copy
-                  </button>
                 </div>
-                <div className="link-actions-group">
-                  <button
-                    onClick={handleLaunchInstantMeet}
-                    className="btn btn-primary"
-                    style={{ flex: 1, padding: '0.6rem', fontSize: '0.85rem' }}
-                  >
-                    Start Call as Host
-                  </button>
-                  <a
-                    href={`https://api.whatsapp.com/send?text=Hi! Please click this link to join our 1-on-1 strategy meeting with Sir: ${generatedLink}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-secondary"
-                    style={{ flex: 1, padding: '0.6rem', fontSize: '0.85rem', color: '#25D366', borderColor: '#25D366', textAlign: 'center' }}
-                  >
-                    Share WhatsApp
-                  </a>
+                
+                <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+                  Create Meeting Room
+                </button>
+              </form>
+
+              {generatedLink && (
+                <div className="generated-link-box">
+                  <div className="generated-link-header">Invitation Link Generated</div>
+                  <div className="link-input-group">
+                    <input
+                      type="text"
+                      readOnly
+                      value={generatedLink}
+                      className="admin-input-dark"
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(generatedLink);
+                        alert('Invitation link copied!');
+                      }}
+                      className="copy-btn-mini"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <div className="link-actions-group">
+                    <button
+                      onClick={handleLaunchInstantMeet}
+                      className="btn btn-primary"
+                      style={{ flex: 1, padding: '0.6rem', fontSize: '0.85rem' }}
+                    >
+                      Start Call as Host
+                    </button>
+                    <a
+                      href={`https://api.whatsapp.com/send?text=Hi! Please click this link to join our 1-on-1 strategy meeting: ${generatedLink}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-secondary"
+                      style={{ flex: 1, padding: '0.6rem', fontSize: '0.85rem', color: '#25D366', borderColor: '#25D366', textAlign: 'center' }}
+                    >
+                      Share WhatsApp
+                    </a>
+                  </div>
                 </div>
-              </div>
-            )}
-          </aside>
+              )}
+            </aside>
+
+            <aside className="admin-card">
+              <h2 className="admin-card-title">Security Settings</h2>
+              <p style={{ color: 'var(--text-light-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Change the host console passcode. Make sure to keep this code secure.
+              </p>
+              
+              <form onSubmit={handleChangePasscode} className="instant-meet-form">
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                  <label htmlFor="curr-pass">Current Passcode *</label>
+                  <input
+                    type="password"
+                    id="curr-pass"
+                    value={currentPasscode}
+                    onChange={(e) => setCurrentPasscode(e.target.value)}
+                    className="form-input lobby-input-dark"
+                    placeholder="Enter current PIN"
+                    required
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                  <label htmlFor="new-pass">New Passcode *</label>
+                  <input
+                    type="password"
+                    id="new-pass"
+                    value={newPasscode}
+                    onChange={(e) => setNewPasscode(e.target.value)}
+                    className="form-input lobby-input-dark"
+                    placeholder="Enter new PIN"
+                    required
+                  />
+                </div>
+                {passcodeSuccess && <p style={{ color: '#22c55e', fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 600 }}>{passcodeSuccess}</p>}
+                {passcodeErr && <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 600 }}>{passcodeErr}</p>}
+                
+                <button type="submit" disabled={updatingPasscode} className="btn btn-primary" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                  <Lock size={16} />
+                  <span>{updatingPasscode ? 'Saving...' : 'Update Passcode'}</span>
+                </button>
+              </form>
+            </aside>
+          </div>
 
           {/* Right Column: Bookings Console */}
           <main className="admin-card">
@@ -317,9 +435,10 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
                             <button
                               onClick={() => setExpandedNotesId(booking.id)}
                               className="btn btn-secondary action-btn-sm"
-                              style={{ color: 'var(--color-orange-brand)', borderColor: 'var(--color-orange-brand)' }}
+                              style={{ color: 'var(--color-orange-brand)', borderColor: 'var(--color-orange-brand)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                             >
-                              📖 View Saved Notes
+                              <BookOpen size={14} />
+                              <span>View Saved Notes</span>
                             </button>
                           )}
                           <button
@@ -346,7 +465,7 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
               </div>
             )}
           </main>
-
+          
         </div>
       </div>
     </div>

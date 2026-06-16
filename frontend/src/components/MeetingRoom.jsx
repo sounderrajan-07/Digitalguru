@@ -1,5 +1,58 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Mic, 
+  MicOff, 
+  Video, 
+  VideoOff, 
+  Monitor, 
+  Layout, 
+  CheckSquare, 
+  FileText, 
+  Info, 
+  UserPlus, 
+  PhoneOff, 
+  Clock, 
+  Shield, 
+  Lock, 
+  Check, 
+  Download, 
+  Save, 
+  Users 
+} from 'lucide-react';
 import './MeetingRoom.css';
+
+function LobbyWaitingScreen({ message, details, showBackHome, onLeave }) {
+  return (
+    <div className="meet-lobby" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="lobby-card glass-card" style={{ maxWidth: '480px', textAlign: 'center', padding: '3rem' }}>
+        <div className="pulsing-wave-avatar" style={{ margin: '0 auto 2rem' }}>
+          <span></span>
+          <span></span>
+          <span></span>
+          <div className="avatar-letter">
+            <Lock size={32} color="var(--color-blue-brand)" />
+          </div>
+        </div>
+        <h2 className="lobby-title" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>{message}</h2>
+        <p className="lobby-subtitle" style={{ fontSize: '1.05rem', color: 'var(--text-light-muted)', marginBottom: '2rem' }}>{details}</p>
+        
+        {showBackHome ? (
+          <button onClick={() => onLeave(false)} className="btn btn-primary btn-full-width">
+            Return to Website
+          </button>
+        ) : (
+          <div className="audio-visualizer-bar active" style={{ margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function MeetingRoom({ meetId, onLeave }) {
   const [inLobby, setInLobby] = useState(true);
@@ -27,6 +80,12 @@ export default function MeetingRoom({ meetId, onLeave }) {
   const [screenActive, setScreenActive] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
+  // Lobby guest & Host heartbeat states
+  const [approvalState, setApprovalState] = useState('idle'); // 'idle' | 'checking_host' | 'waiting_host' | 'waiting_approval' | 'approved' | 'declined'
+  const [guestId] = useState(() => 'gst-' + Math.random().toString(36).substring(2, 12));
+  const [waitingGuests, setWaitingGuests] = useState([]);
+  const [prevWaitingCount, setPrevWaitingCount] = useState(0);
+
   const jitsiContainerRef = useRef(null);
   const jitsiApiRef = useRef(null);
 
@@ -65,6 +124,140 @@ export default function MeetingRoom({ meetId, onLeave }) {
     fetchBookingDetails();
   }, [meetId]);
 
+  // Host heartbeat and waiting list polling
+  useEffect(() => {
+    if (inLobby || !isHost) return;
+
+    // Heartbeat every 4 seconds
+    const heartbeatInterval = setInterval(async () => {
+      try {
+        await fetch(`${apiBaseUrl}/bookings/${meetId}/host-heartbeat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (err) {
+        console.error('Host heartbeat failed:', err);
+      }
+    }, 4000);
+
+    // Initial heartbeat
+    fetch(`${apiBaseUrl}/bookings/${meetId}/host-heartbeat`, { method: 'POST' });
+
+    // Poll waiting list status every 3 seconds
+    const pollGuestsInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/bookings/${meetId}/status`);
+        if (res.ok) {
+          const status = await res.json();
+          setWaitingGuests(status.waitingGuests || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch waiting guests:', err);
+      }
+    }, 3000);
+
+    return () => {
+      clearInterval(heartbeatInterval);
+      clearInterval(pollGuestsInterval);
+    };
+  }, [inLobby, isHost, meetId]);
+
+  // Auto-switch to Lobby tab for Host when someone knocks
+  useEffect(() => {
+    if (!isHost) return;
+    const waitingCount = waitingGuests.filter(g => g.status === 'waiting').length;
+    if (waitingCount > prevWaitingCount) {
+      setActiveTab('lobby');
+    }
+    setPrevWaitingCount(waitingCount);
+  }, [waitingGuests, isHost, prevWaitingCount]);
+
+  // Guest checking host presence and knock status
+  useEffect(() => {
+    if (isHost || approvalState === 'idle' || approvalState === 'approved') return;
+
+    let presenceInterval;
+    let knockInterval;
+
+    if (approvalState === 'checking_host' || approvalState === 'waiting_host') {
+      presenceInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`${apiBaseUrl}/bookings/${meetId}/status`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.hostPresent) {
+              clearInterval(presenceInterval);
+              // Host is present, send knock request
+              setApprovalState('waiting_approval');
+              await fetch(`${apiBaseUrl}/bookings/${meetId}/knock`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ guestId, name })
+              });
+            } else {
+              setApprovalState('waiting_host');
+            }
+          }
+        } catch (err) {
+          console.error('Failed to check host presence:', err);
+        }
+      }, 3000);
+    }
+
+    if (approvalState === 'waiting_approval') {
+      knockInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`${apiBaseUrl}/bookings/${meetId}/knock-status?guestId=${guestId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.status === 'approved') {
+              clearInterval(knockInterval);
+              setApprovalState('approved');
+              setInLobby(false);
+              
+              // Load Jitsi Call
+              await loadJitsiScript();
+              setJitsiLoaded(true);
+
+              setTimeout(() => {
+                if (!jitsiContainerRef.current) return;
+                const domain = 'meet.jit.si';
+                const options = {
+                  roomName: `DigitalGuru-1on1-${meetId}`,
+                  width: '100%',
+                  height: '100%',
+                  parentNode: jitsiContainerRef.current,
+                  userInfo: { displayName: name },
+                  configOverwrite: {
+                    startWithAudioMuted: !micActive,
+                    startWithVideoMuted: !cameraActive,
+                    prejoinPageEnabled: false,
+                    disableDeepLinking: true,
+                    toolbarButtons: []
+                  }
+                };
+                const api = new window.JitsiMeetExternalAPI(domain, options);
+                jitsiApiRef.current = api;
+                api.addEventListener('videoConferenceLeft', () => handleLeave());
+              }, 200);
+
+            } else if (data.status === 'declined') {
+              clearInterval(knockInterval);
+              setApprovalState('declined');
+            }
+          }
+        } catch (err) {
+          console.error('Failed to check knock status:', err);
+        }
+      }, 3000);
+    }
+
+    return () => {
+      if (presenceInterval) clearInterval(presenceInterval);
+      if (knockInterval) clearInterval(knockInterval);
+    };
+  }, [approvalState, isHost, meetId]);
+
   // Format Timer
   const formatTimer = (totalSeconds) => {
     const hrs = Math.floor(totalSeconds / 3600);
@@ -100,57 +293,63 @@ export default function MeetingRoom({ meetId, onLeave }) {
       return;
     }
 
-    if (isHost && passcode !== '1234' && passcode.toLowerCase() !== 'guru123') {
-      setPasscodeError('Invalid passcode. Use the host verification code.');
-      return;
-    }
-
-    setPasscodeError('');
-    setInLobby(false);
-
-    // Initialize Jitsi Call
-    await loadJitsiScript();
-    setJitsiLoaded(true);
-
-    setTimeout(() => {
-      if (!jitsiContainerRef.current) return;
-      
-      const domain = 'meet.jit.si';
-      const options = {
-        roomName: `DigitalGuru-1on1-${meetId}`,
-        width: '100%',
-        height: '100%',
-        parentNode: jitsiContainerRef.current,
-        userInfo: {
-          displayName: isHost ? `Sir (Host)` : name
-        },
-        configOverwrite: {
-          startWithAudioMuted: !micActive,
-          startWithVideoMuted: !cameraActive,
-          prejoinPageEnabled: false, // Bypass Jitsi prejoin since we have custom lobby
-          disableDeepLinking: true, // Avoid app redirect popups
-          toolbarButtons: [] // Hides Jitsi's default bottom toolbar completely
-        },
-        interfaceConfigOverwrite: {
-          TOOLBAR_BUTTONS: [
-            'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
-            'fodeviceselection', 'hangup', 'profile', 'info', 'chat',
-            'recording', 'livestreaming', 'etherpad', 'sharedvideo', 'settings',
-            'raisehand', 'videoquality', 'filmstrip', 'invite', 'feedback',
-            'stats', 'shortcuts', 'tileview', 'select-background',
-            'mute-everyone', 'mute-video-everyone'
-          ]
+    if (isHost) {
+      try {
+        const res = await fetch(`${apiBaseUrl}/auth/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ passcode })
+        });
+        if (!res.ok) {
+          const errData = await res.json();
+          setPasscodeError(errData.error || 'Invalid passcode. Access Denied.');
+          return;
         }
-      };
+      } catch (err) {
+        console.error(err);
+        setPasscodeError('Error verifying passcode.');
+        return;
+      }
 
-      const api = new window.JitsiMeetExternalAPI(domain, options);
-      jitsiApiRef.current = api;
+      setPasscodeError('');
+      setInLobby(false);
 
-      // Handle call hangup
-      api.addEventListener('videoConferenceLeft', () => {
-        handleLeave();
-      });
-    }, 200);
+      // Initialize Jitsi Call as Host
+      await loadJitsiScript();
+      setJitsiLoaded(true);
+
+      setTimeout(() => {
+        if (!jitsiContainerRef.current) return;
+        
+        const domain = 'meet.jit.si';
+        const options = {
+          roomName: `DigitalGuru-1on1-${meetId}`,
+          width: '100%',
+          height: '100%',
+          parentNode: jitsiContainerRef.current,
+          userInfo: {
+            displayName: `Advisor (Host)`
+          },
+          configOverwrite: {
+            startWithAudioMuted: !micActive,
+            startWithVideoMuted: !cameraActive,
+            prejoinPageEnabled: false,
+            disableDeepLinking: true,
+            toolbarButtons: []
+          }
+        };
+
+        const api = new window.JitsiMeetExternalAPI(domain, options);
+        jitsiApiRef.current = api;
+
+        api.addEventListener('videoConferenceLeft', () => {
+          handleLeave();
+        });
+      }, 200);
+    } else {
+      // Guest checks host presence
+      setApprovalState('checking_host');
+    }
   };
 
   // Cleanup Jitsi instance
@@ -159,7 +358,7 @@ export default function MeetingRoom({ meetId, onLeave }) {
       jitsiApiRef.current.dispose();
       jitsiApiRef.current = null;
     }
-    onLeave();
+    onLeave(isHost);
   };
 
   // State toggle helpers for live Jitsi call
@@ -204,7 +403,7 @@ export default function MeetingRoom({ meetId, onLeave }) {
       const payload = {
         notes: updatedNotes !== undefined ? updatedNotes : notes,
         roadmapProgress: updatedRoadmap !== undefined ? updatedRoadmap : roadmapProgress,
-        name: bookingData ? bookingData.name : (isHost ? 'Sir' : name)
+        name: bookingData ? bookingData.name : (isHost ? 'Advisor' : name)
       };
 
       const res = await fetch(`${apiBaseUrl}/bookings/${meetId}/notes`, {
@@ -263,6 +462,23 @@ export default function MeetingRoom({ meetId, onLeave }) {
     document.body.removeChild(element);
   };
 
+  // Guest Knock Lobby Screens
+  if (!isHost && approvalState === 'checking_host') {
+    return <LobbyWaitingScreen message="Connecting to Workspace..." details="Checking advisor status and verifying the meeting room..." onLeave={handleLeave} />;
+  }
+
+  if (!isHost && approvalState === 'waiting_host') {
+    return <LobbyWaitingScreen message="Waiting for Host..." details="This meeting link is only active when the Host is present. Please wait." onLeave={handleLeave} />;
+  }
+
+  if (!isHost && approvalState === 'waiting_approval') {
+    return <LobbyWaitingScreen message="Requesting Entry..." details="Waiting for the host to admit you to the secure session room..." onLeave={handleLeave} />;
+  }
+
+  if (!isHost && approvalState === 'declined') {
+    return <LobbyWaitingScreen message="Access Denied" details="The Advisor has declined your request to join this session." showBackHome onLeave={handleLeave} />;
+  }
+
   return (
     <div className="meet-page">
       {/* Header */}
@@ -273,8 +489,9 @@ export default function MeetingRoom({ meetId, onLeave }) {
         </div>
         {!inLobby && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-light-muted)' }}>
-              ⏱ Time: {formatTimer(secondsElapsed)}
+            <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-light-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Clock size={16} />
+              <span>Time: {formatTimer(secondsElapsed)}</span>
             </span>
             <div className="meet-status-badge">
               <span className="status-dot"></span>
@@ -298,13 +515,15 @@ export default function MeetingRoom({ meetId, onLeave }) {
                       <span></span>
                       <span></span>
                       <span></span>
-                      <div className="avatar-letter">{isHost ? 'S' : (name ? name.charAt(0).toUpperCase() : 'G')}</div>
+                      <div className="avatar-letter">{isHost ? 'A' : (name ? name.charAt(0).toUpperCase() : 'G')}</div>
                     </div>
                     <span className="preview-feed-label">Camera is On</span>
                   </div>
                 ) : (
                   <div className="preview-feed-off">
-                    <div className="camera-off-icon">📷❌</div>
+                    <div className="camera-off-icon">
+                      <VideoOff size={32} color="var(--color-orange-brand)" />
+                    </div>
                     <span className="preview-feed-label">Camera is Off</span>
                   </div>
                 )}
@@ -325,16 +544,20 @@ export default function MeetingRoom({ meetId, onLeave }) {
                   onClick={() => setMicActive(p => !p)} 
                   className={`btn-lobby-control ${micActive ? 'active' : 'muted'}`}
                   title={micActive ? "Mute Microphone" : "Unmute Microphone"}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'center' }}
                 >
-                  {micActive ? '🎙️ Mic On' : '🎙️❌ Muted'}
+                  {micActive ? <Mic size={16} /> : <MicOff size={16} />}
+                  <span>{micActive ? 'Mic On' : 'Muted'}</span>
                 </button>
                 <button 
                   type="button" 
                   onClick={() => setCameraActive(p => !p)} 
                   className={`btn-lobby-control ${cameraActive ? 'active' : 'muted'}`}
                   title={cameraActive ? "Turn Camera Off" : "Turn Camera On"}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'center' }}
                 >
-                  {cameraActive ? '📷 Camera On' : '📷❌ Video Off'}
+                  {cameraActive ? <Video size={16} /> : <VideoOff size={16} />}
+                  <span>{cameraActive ? 'Camera On' : 'Video Off'}</span>
                 </button>
               </div>
             </div>
@@ -355,10 +578,10 @@ export default function MeetingRoom({ meetId, onLeave }) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setIsHost(true); setName('Sir'); }}
+                    onClick={() => { setIsHost(true); setName('Advisor'); }}
                     className={`role-btn ${isHost ? 'active' : ''}`}
                   >
-                    Join as Host (Sir)
+                    Join as Advisor (Host)
                   </button>
                 </div>
 
@@ -391,9 +614,9 @@ export default function MeetingRoom({ meetId, onLeave }) {
                   </div>
                 )}
 
-                <button type="submit" className="btn btn-primary btn-full-width" style={{ marginTop: '1.5rem' }}>
-                  Join Live Video Call
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <button type="submit" className="btn btn-primary btn-full-width" style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                  <span>Join Live Video Call</span>
+                  <Check size={18} />
                 </button>
               </form>
             </div>
@@ -427,59 +650,28 @@ export default function MeetingRoom({ meetId, onLeave }) {
                   className={`btn-meet-action ${micActive ? 'active' : 'muted'}`} 
                   title={micActive ? "Mute Microphone" : "Unmute Microphone"}
                 >
-                  {micActive ? (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                      <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-                      <line x1="12" y1="19" x2="12" y2="23"/>
-                      <line x1="8" y1="23" x2="16" y2="23"/>
-                    </svg>
-                  ) : (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="1" y1="1" x2="23" y2="23"/>
-                      <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/>
-                      <line x1="12" y1="19" x2="12" y2="23"/>
-                      <line x1="8" y1="23" x2="16" y2="23"/>
-                    </svg>
-                  )}
+                  {micActive ? <Mic size={20} /> : <MicOff size={20} />}
                 </button>
                 <button 
                   onClick={handleToggleCamera} 
                   className={`btn-meet-action ${cameraActive ? 'active' : 'muted'}`} 
                   title={cameraActive ? "Turn Off Camera" : "Turn On Camera"}
                 >
-                  {cameraActive ? (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="23 7 16 12 23 17 23 7"/>
-                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-                    </svg>
-                  ) : (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10l-2.66-1.9"/>
-                      <line x1="1" y1="1" x2="23" y2="23"/>
-                    </svg>
-                  )}
+                  {cameraActive ? <Video size={20} /> : <VideoOff size={20} />}
                 </button>
                 <button 
                   onClick={handleToggleScreen} 
                   className={`btn-meet-action ${screenActive ? 'active-yellow' : ''}`} 
                   title={screenActive ? "Stop Sharing Screen" : "Share Screen"}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                    <line x1="8" y1="21" x2="16" y2="21"/>
-                    <line x1="12" y1="17" x2="12" y2="21"/>
-                  </svg>
+                  <Monitor size={20} />
                 </button>
                 <button 
                   onClick={handleToggleSidebar} 
                   className={`btn-meet-action ${sidebarOpen ? 'active' : ''}`} 
                   title={sidebarOpen ? "Hide Strategy Workspace" : "Show Strategy Workspace"}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-                  </svg>
+                  <Layout size={20} />
                 </button>
                 <button 
                   onClick={() => {
@@ -489,26 +681,20 @@ export default function MeetingRoom({ meetId, onLeave }) {
                   className="btn-meet-action" 
                   title="Copy Client Invite Link"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="8.5" cy="7" r="4"/>
-                    <line x1="20" y1="8" x2="20" y2="14"/>
-                    <line x1="23" y1="11" x2="17" y2="11"/>
-                  </svg>
+                  <UserPlus size={20} />
                 </button>
                 <button 
                   onClick={handleLeave} 
                   className="btn-meet-action hangup" 
                   title="Leave Call"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'rotate(135deg)' }}>
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                  </svg>
+                  <PhoneOff size={20} style={{ transform: 'scaleX(-1)' }} />
                 </button>
               </div>
               
               <div className="video-timer-group">
-                ⏱ {formatTimer(secondsElapsed)}
+                <Clock size={14} className="icon-inline" style={{ marginRight: '0.3rem' }} />
+                <span>{formatTimer(secondsElapsed)}</span>
               </div>
             </div>
           </section>
@@ -517,28 +703,101 @@ export default function MeetingRoom({ meetId, onLeave }) {
           {sidebarOpen && (
             <aside className="workspace-sidebar">
               <div className="sidebar-tabs">
+                {isHost && (
+                  <button 
+                    onClick={() => setActiveTab('lobby')}
+                    className={`tab-btn ${activeTab === 'lobby' ? 'active' : ''}`}
+                    style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    <Users size={16} />
+                    <span>Lobby</span>
+                    {waitingGuests.filter(g => g.status === 'waiting').length > 0 && (
+                      <span className="badge-notification">
+                        {waitingGuests.filter(g => g.status === 'waiting').length}
+                      </span>
+                    )}
+                  </button>
+                )}
                 <button 
                   onClick={() => setActiveTab('roadmap')}
                   className={`tab-btn ${activeTab === 'roadmap' ? 'active' : ''}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                 >
-                  📋 Roadmap
+                  <CheckSquare size={16} />
+                  <span>Roadmap</span>
                 </button>
                 <button 
                   onClick={() => setActiveTab('notes')}
                   className={`tab-btn ${activeTab === 'notes' ? 'active' : ''}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                 >
-                  📝 Notes
+                  <FileText size={16} />
+                  <span>Notes</span>
                 </button>
                 <button 
                   onClick={() => setActiveTab('info')}
                   className={`tab-btn ${activeTab === 'info' ? 'active' : ''}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                 >
-                  💬 Info
+                  <Info size={16} />
+                  <span>Info</span>
                 </button>
               </div>
 
               <div className="sidebar-content">
                 
+                {/* Tab: Lobby waiting guests list (Host only) */}
+                {activeTab === 'lobby' && isHost && (
+                  <div className="lobby-requests-container">
+                    <h4 style={{ color: '#fff', fontSize: '0.85rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Lobby Waiting Room
+                    </h4>
+                    {waitingGuests.filter(g => g.status === 'waiting').length === 0 ? (
+                      <p style={{ color: 'var(--text-light-muted)', fontSize: '0.85rem', textAlign: 'center', padding: '2rem 0' }}>
+                        No guests waiting to join.
+                      </p>
+                    ) : (
+                      <div className="waiting-guests-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {waitingGuests.filter(g => g.status === 'waiting').map(guest => (
+                          <div key={guest.id} className="guest-request-card" style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 'var(--border-radius-sm)', padding: '1rem' }}>
+                            <p style={{ fontWeight: 600, color: '#fff', marginBottom: '0.75rem' }}>{guest.name}</p>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <button 
+                                onClick={async () => {
+                                  await fetch(`${apiBaseUrl}/bookings/${meetId}/approve-guest`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ guestId: guest.id, action: 'approve' })
+                                  });
+                                  setWaitingGuests(prev => prev.map(g => g.id === guest.id ? { ...g, status: 'approved' } : g));
+                                }}
+                                className="btn btn-primary" 
+                                style={{ flex: 1, padding: '0.5rem 0', fontSize: '0.8rem' }}
+                              >
+                                Admit
+                              </button>
+                              <button 
+                                onClick={async () => {
+                                  await fetch(`${apiBaseUrl}/bookings/${meetId}/approve-guest`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ guestId: guest.id, action: 'decline' })
+                                  });
+                                  setWaitingGuests(prev => prev.map(g => g.id === guest.id ? { ...g, status: 'declined' } : g));
+                                }}
+                                className="btn btn-secondary" 
+                                style={{ flex: 1, padding: '0.5rem 0', fontSize: '0.8rem', color: 'var(--color-orange-brand)', borderColor: 'var(--color-orange-brand)' }}
+                              >
+                                Decline
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Tab 1: Strategic Checklist */}
                 {activeTab === 'roadmap' && (
                   <div className="roadmap-container">
@@ -557,7 +816,9 @@ export default function MeetingRoom({ meetId, onLeave }) {
                         onClick={() => toggleRoadmapItem('offerAudit')}
                         className={`roadmap-item ${roadmapProgress.offerAudit ? 'completed' : ''}`}
                       >
-                        <div className="roadmap-checkbox">✓</div>
+                        <div className="roadmap-checkbox">
+                          {roadmapProgress.offerAudit ? <Check size={12} strokeWidth={3} /> : null}
+                        </div>
                         <div className="roadmap-text">
                           <h4>1. Offer & Authority Packaging</h4>
                           <p>Analyze margin structures, build high-ticket tiers, and formulate authority positioning statements.</p>
@@ -568,7 +829,9 @@ export default function MeetingRoom({ meetId, onLeave }) {
                         onClick={() => toggleRoadmapItem('trustFunnel')}
                         className={`roadmap-item ${roadmapProgress.trustFunnel ? 'completed' : ''}`}
                       >
-                        <div className="roadmap-checkbox">✓</div>
+                        <div className="roadmap-checkbox">
+                          {roadmapProgress.trustFunnel ? <Check size={12} strokeWidth={3} /> : null}
+                        </div>
                         <div className="roadmap-text">
                           <h4>2. Client Acquisition Trust Funnel</h4>
                           <p>Audit organic authority posts, client messaging sequences, and landing page conversions.</p>
@@ -579,7 +842,9 @@ export default function MeetingRoom({ meetId, onLeave }) {
                         onClick={() => toggleRoadmapItem('salesScripts')}
                         className={`roadmap-item ${roadmapProgress.salesScripts ? 'completed' : ''}`}
                       >
-                        <div className="roadmap-checkbox">✓</div>
+                        <div className="roadmap-checkbox">
+                          {roadmapProgress.salesScripts ? <Check size={12} strokeWidth={3} /> : null}
+                        </div>
                         <div className="roadmap-text">
                           <h4>3. Conversational Sales Closing</h4>
                           <p>Review objections handling playbook, structure high-ticket sales script, and establish call rules.</p>
@@ -607,15 +872,18 @@ export default function MeetingRoom({ meetId, onLeave }) {
                         onClick={() => handleSaveData(notes, undefined)}
                         disabled={savingNotes}
                         className="btn btn-primary btn-full-width"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
                       >
-                        {savingNotes ? 'Saving Notes...' : '💾 Save Notes to Database'}
+                        <Save size={16} />
+                        <span>{savingNotes ? 'Saving Notes...' : 'Save Notes to Database'}</span>
                       </button>
                       <button 
                         onClick={handleDownloadNotes}
                         className="btn btn-secondary btn-full-width"
-                        style={{ border: '1.5px dashed rgba(255,255,255,0.15)', color: '#fff' }}
+                        style={{ border: '1.5px dashed rgba(255,255,255,0.15)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
                       >
-                        📥 Download Notes (.txt)
+                        <Download size={16} />
+                        <span>Download Notes (.txt)</span>
                       </button>
                     </div>
                   </div>

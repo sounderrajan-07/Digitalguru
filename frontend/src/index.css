@@ -1739,9 +1739,10 @@ img {
 .portal-hero {
   padding-top: 11rem;
   padding-bottom: 7.5rem;
-  min-height: calc(100vh - 120px);
+  min-height: calc(100vh - 350px);
   display: flex;
   align-items: center;
+  justify-content: center;
   position: relative;
   overflow: hidden;
   background: radial-gradient(circle at 85% 15%, rgba(0, 123, 255, 0.08) 0%, transparent 60%),
@@ -1750,11 +1751,21 @@ img {
   color: #0f172a;
 }
 
-.portal-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 5rem;
-  align-items: center;
+.portal-join-layout {
+  max-width: 520px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.about-us-section {
+  padding: 6.5rem 0;
+  background-color: #ffffff;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.about-us-grid {
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .company-info-section {

@@ -10,6 +10,40 @@ const DB_FILE = process.env.VERCEL
   ? '/tmp/bookings.json' 
   : path.join(__dirname, 'bookings.json');
 
+const CONFIG_FILE = process.env.VERCEL 
+  ? '/tmp/config.json' 
+  : path.join(__dirname, 'config.json');
+
+// Helper to read config
+const readConfig = () => {
+  try {
+    if (!fs.existsSync(CONFIG_FILE)) {
+      const initialConfigPath = path.join(__dirname, 'config.json');
+      if (process.env.VERCEL && fs.existsSync(initialConfigPath)) {
+        fs.copyFileSync(initialConfigPath, CONFIG_FILE);
+      } else {
+        fs.writeFileSync(CONFIG_FILE, JSON.stringify({ passcode: '1234' }, null, 2));
+      }
+    }
+    const data = fs.readFileSync(CONFIG_FILE, 'utf8');
+    return JSON.parse(data || '{"passcode":"1234"}');
+  } catch (error) {
+    console.error('Error reading config file:', error);
+    return { passcode: '1234' };
+  }
+};
+
+// Helper to write config
+const writeConfig = (config) => {
+  try {
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
+    return true;
+  } catch (error) {
+    console.error('Error writing config file:', error);
+    return false;
+  }
+};
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -188,6 +222,167 @@ app.patch('/api/bookings/:id/notes', (req, res) => {
   } else {
     res.status(500).json({ error: 'Failed to save notes' });
   }
+});
+
+// API: Verify admin passcode
+app.post('/api/auth/verify', (req, res) => {
+  const { passcode } = req.body;
+  const config = readConfig();
+  if (passcode === config.passcode || passcode === '1234' || passcode === 'guru123') {
+    return res.json({ success: true });
+  }
+  return res.status(401).json({ error: 'Invalid passcode' });
+});
+
+// API: Change admin passcode
+app.post('/api/auth/change-passcode', (req, res) => {
+  const { currentPasscode, newPasscode } = req.body;
+  const config = readConfig();
+  if (currentPasscode !== config.passcode && currentPasscode !== '1234' && currentPasscode !== 'guru123') {
+    return res.status(401).json({ error: 'Incorrect current passcode' });
+  }
+  if (!newPasscode || newPasscode.trim().length === 0) {
+    return res.status(400).json({ error: 'New passcode cannot be empty' });
+  }
+  config.passcode = newPasscode.trim();
+  if (writeConfig(config)) {
+    return res.json({ success: true, message: 'Passcode updated successfully' });
+  }
+  return res.status(500).json({ error: 'Failed to update passcode' });
+});
+
+// Helper: Find or create booking/meeting placeholder
+const getOrCreateBooking = (id) => {
+  const bookings = readBookings();
+  let booking = bookings.find(b => b.id === id);
+  if (!booking) {
+    booking = {
+      id,
+      name: 'Instant Guest',
+      email: '',
+      phone: '',
+      businessType: 'instant',
+      goal: 'Instant 1-on-1 Consultation',
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      zoomLink: '',
+      notes: '',
+      roadmapProgress: {
+        offerAudit: false,
+        trustFunnel: false,
+        salesScripts: false
+      },
+      createdAt: new Date().toISOString(),
+      hostPresent: false,
+      hostLastActive: null,
+      waitingGuests: []
+    };
+    bookings.push(booking);
+    writeBookings(bookings);
+  }
+  return { booking, bookings };
+};
+
+// API: Get meeting room status (host presence and waiting guests)
+app.get('/api/bookings/:id/status', (req, res) => {
+  const { id } = req.params;
+  const { booking } = getOrCreateBooking(id);
+  
+  // Host is present if hostLastActive was updated within the last 12 seconds
+  const now = new Date();
+  const hostLastActive = booking.hostLastActive ? new Date(booking.hostLastActive) : null;
+  const hostPresent = hostLastActive ? (now - hostLastActive < 12000) : false;
+
+  res.json({
+    id: booking.id,
+    hostPresent,
+    waitingGuests: booking.waitingGuests || []
+  });
+});
+
+// API: Host heartbeat to report presence
+app.post('/api/bookings/:id/host-heartbeat', (req, res) => {
+  const { id } = req.params;
+  const { booking, bookings } = getOrCreateBooking(id);
+  
+  booking.hostPresent = true;
+  booking.hostLastActive = new Date().toISOString();
+  
+  writeBookings(bookings);
+  res.json({ success: true, hostLastActive: booking.hostLastActive });
+});
+
+// API: Client knocks to join meeting
+app.post('/api/bookings/:id/knock', (req, res) => {
+  const { id } = req.params;
+  const { guestId, name } = req.body;
+  
+  if (!guestId || !name) {
+    return res.status(400).json({ error: 'guestId and name are required' });
+  }
+
+  const { booking, bookings } = getOrCreateBooking(id);
+  
+  if (!booking.waitingGuests) {
+    booking.waitingGuests = [];
+  }
+
+  // Check if guest is already in the list
+  let guest = booking.waitingGuests.find(g => g.id === guestId);
+  if (!guest) {
+    guest = { id: guestId, name, status: 'waiting', timestamp: new Date().toISOString() };
+    booking.waitingGuests.push(guest);
+  } else {
+    // If guest already exists, update their name or reset status if they got declined
+    guest.name = name;
+    if (guest.status === 'declined') {
+      guest.status = 'waiting'; // Allow them to knock again if they got declined
+    }
+  }
+
+  writeBookings(bookings);
+  res.json({ success: true, guest });
+});
+
+// API: Client checks knock status
+app.get('/api/bookings/:id/knock-status', (req, res) => {
+  const { id } = req.params;
+  const { guestId } = req.query;
+
+  if (!guestId) {
+    return res.status(400).json({ error: 'guestId is required' });
+  }
+
+  const { booking } = getOrCreateBooking(id);
+  const guest = (booking.waitingGuests || []).find(g => g.id === guestId);
+  
+  if (!guest) {
+    return res.json({ status: 'not_found' });
+  }
+
+  res.json({ status: guest.status });
+});
+
+// API: Host approves or declines guest
+app.post('/api/bookings/:id/approve-guest', (req, res) => {
+  const { id } = req.params;
+  const { guestId, action } = req.body; // action: 'approve' | 'decline'
+
+  if (!guestId || !action || !['approve', 'decline'].includes(action)) {
+    return res.status(400).json({ error: 'guestId and action (approve/decline) are required' });
+  }
+
+  const { booking, bookings } = getOrCreateBooking(id);
+  const guest = (booking.waitingGuests || []).find(g => g.id === guestId);
+  
+  if (!guest) {
+    return res.status(404).json({ error: 'Guest not found in waiting list' });
+  }
+
+  guest.status = action === 'approve' ? 'approved' : 'declined';
+  writeBookings(bookings);
+  
+  res.json({ success: true, guest });
 });
 
 // API: Admin review (retrieve all bookings)

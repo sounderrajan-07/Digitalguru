@@ -915,3 +915,27 @@
     font-size: 1.15rem;
   }
 }
+
+/* Lobby Badge Notification & Requests */
+.badge-notification {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background-color: var(--color-orange-brand);
+  color: white;
+  border-radius: 50%;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+  line-height: 1.2;
+  border: 1px solid var(--bg-dark);
+}
+
+.guest-request-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.guest-request-card:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
