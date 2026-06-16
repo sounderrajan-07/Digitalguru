@@ -324,7 +324,7 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
                           )}
                           <button
                             onClick={() => {
-                              navigator.clipboard.writeText(booking.zoomLink || `${window.location.origin}/?meet=${booking.id}`);
+                              navigator.clipboard.writeText(`${window.location.origin}/?meet=${booking.id}`);
                               alert('Client invite link copied!');
                             }}
                             className="btn btn-secondary action-btn-sm"
