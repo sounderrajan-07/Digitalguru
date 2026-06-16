@@ -83,11 +83,11 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
             <div className="lock-badge">Secure Console</div>
           </div>
           <h2 className="lobby-title" style={{ marginTop: '1rem' }}>Host Verification</h2>
-          <p className="lobby-subtitle" style={{ marginBottom: '2rem' }}>This section is protected for Sir's meeting management console.</p>
+          <p className="lobby-subtitle" style={{ marginBottom: '2rem' }}>This section is protected for Host's meeting management console.</p>
           
           <form onSubmit={handlePinSubmit}>
             <div className="form-group" style={{ textAlign: 'left' }}>
-              <label htmlFor="admin-pin">Enter Sir's Passcode *</label>
+              <label htmlFor="admin-pin">Enter your Passcode *</label>
               <input
                 type="password"
                 id="admin-pin"

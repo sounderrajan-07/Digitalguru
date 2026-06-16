@@ -376,7 +376,7 @@ export default function MeetingRoom({ meetId, onLeave }) {
 
                 {isHost && (
                   <div className="form-group">
-                    <label htmlFor="host-passcode">Sir's Host Passcode *</label>
+                    <label htmlFor="host-passcode">Enter Host Passcode *</label>
                     <input
                       type="password"
                       id="host-passcode"
