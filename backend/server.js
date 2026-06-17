@@ -236,7 +236,7 @@ app.patch('/api/bookings/:id/notes', (req, res) => {
 app.post('/api/auth/verify', (req, res) => {
   const { passcode } = req.body;
   const config = readConfig();
-  if (passcode === config.passcode || passcode === '1234' || passcode === 'guru123') {
+  if (passcode === config.passcode || passcode === 'guru123') {
     return res.json({ success: true });
   }
   return res.status(401).json({ error: 'Invalid passcode' });

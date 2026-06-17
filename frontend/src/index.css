@@ -81,7 +81,13 @@ h2 {
 h3 {
   font-size: clamp(1.4rem, 3.2vw, 1.85rem);
 }
+.subtitle {
+  font-family: 'Poppins', sans-serif;
+}
 
+body, p {
+  font-family: 'Inter', sans-serif;
+}
 a {
   text-decoration: none;
   color: inherit;
