@@ -180,7 +180,7 @@
   position: relative;
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg, var(--color-blue-brand) 0%, var(--color-orange-brand) 100%);
+  background: linear-gradient(135deg, var(--color-blue-brand) 0%, var(--color-yellow-accent) 50%, var(--color-orange-brand) 100%);
   border-radius: 50%;
   color: #ffffff;
   font-size: 2.2rem;
@@ -324,7 +324,7 @@
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, var(--color-blue-brand), var(--color-orange-brand), var(--color-yellow-accent));
+  background: linear-gradient(90deg, var(--color-blue-brand) 0%, var(--color-yellow-accent) 50%, var(--color-orange-brand) 100%);
 }
 
 .lobby-title {
