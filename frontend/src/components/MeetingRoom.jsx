@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+ import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  Mic, 
+  Mic,
   MicOff, 
   Video, 
   VideoOff, 
@@ -12,7 +12,6 @@ import {
   UserPlus, 
   PhoneOff, 
   Clock, 
-  Shield, 
   Lock, 
   Check, 
   Download, 
@@ -20,6 +19,10 @@ import {
   Users 
 } from 'lucide-react';
 import './MeetingRoom.css';
+
+const apiBaseUrl = window.location.origin.includes('localhost:5173')
+  ? 'http://localhost:5000/api'
+  : '/api';
 
 function LobbyWaitingScreen({ message, details, showBackHome, onLeave }) {
   return (
@@ -89,176 +92,7 @@ export default function MeetingRoom({ meetId, onLeave }) {
   const jitsiContainerRef = useRef(null);
   const jitsiApiRef = useRef(null);
 
-  const apiBaseUrl = window.location.origin.includes('localhost:5173')
-    ? 'http://localhost:5000/api'
-    : '/api';
-
-  // Timer Effect
-  useEffect(() => {
-    if (inLobby) return;
-    const interval = setInterval(() => {
-      setSecondsElapsed(prev => prev + 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [inLobby]);
-
-  // Load meeting/booking data from server
-  useEffect(() => {
-    const fetchBookingDetails = async () => {
-      try {
-        const res = await fetch(`${apiBaseUrl}/admin/bookings`);
-        if (!res.ok) throw new Error('Failed to fetch bookings');
-        const bookings = await res.json();
-        const found = bookings.find(b => b.id === meetId);
-        if (found) {
-          setBookingData(found);
-          setNotes(found.notes || '');
-          if (found.roadmapProgress) {
-            setRoadmapProgress(found.roadmapProgress);
-          }
-        }
-      } catch (err) {
-        console.error('Error loading booking data:', err);
-      }
-    };
-    fetchBookingDetails();
-  }, [meetId]);
-
-  // Host heartbeat and waiting list polling
-  useEffect(() => {
-    if (inLobby || !isHost) return;
-
-    // Heartbeat every 4 seconds
-    const heartbeatInterval = setInterval(async () => {
-      try {
-        await fetch(`${apiBaseUrl}/bookings/${meetId}/host-heartbeat`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-      } catch (err) {
-        console.error('Host heartbeat failed:', err);
-      }
-    }, 4000);
-
-    // Initial heartbeat
-    fetch(`${apiBaseUrl}/bookings/${meetId}/host-heartbeat`, { method: 'POST' });
-
-    // Poll waiting list status every 3 seconds
-    const pollGuestsInterval = setInterval(async () => {
-      try {
-        const res = await fetch(`${apiBaseUrl}/bookings/${meetId}/status`);
-        if (res.ok) {
-          const status = await res.json();
-          setWaitingGuests(status.waitingGuests || []);
-        }
-      } catch (err) {
-        console.error('Failed to fetch waiting guests:', err);
-      }
-    }, 3000);
-
-    return () => {
-      clearInterval(heartbeatInterval);
-      clearInterval(pollGuestsInterval);
-    };
-  }, [inLobby, isHost, meetId]);
-
-  // Auto-switch to Lobby tab for Host when someone knocks
-  useEffect(() => {
-    if (!isHost) return;
-    const waitingCount = waitingGuests.filter(g => g.status === 'waiting').length;
-    if (waitingCount > prevWaitingCount) {
-      setActiveTab('lobby');
-    }
-    setPrevWaitingCount(waitingCount);
-  }, [waitingGuests, isHost, prevWaitingCount]);
-
-  // Guest checking host presence and knock status
-  useEffect(() => {
-    if (isHost || approvalState === 'idle' || approvalState === 'approved') return;
-
-    let presenceInterval;
-    let knockInterval;
-
-    if (approvalState === 'checking_host' || approvalState === 'waiting_host') {
-      presenceInterval = setInterval(async () => {
-        try {
-          const res = await fetch(`${apiBaseUrl}/bookings/${meetId}/status`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data.hostPresent) {
-              clearInterval(presenceInterval);
-              // Host is present, send knock request
-              setApprovalState('waiting_approval');
-              await fetch(`${apiBaseUrl}/bookings/${meetId}/knock`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ guestId, name })
-              });
-            } else {
-              setApprovalState('waiting_host');
-            }
-          }
-        } catch (err) {
-          console.error('Failed to check host presence:', err);
-        }
-      }, 3000);
-    }
-
-    if (approvalState === 'waiting_approval') {
-      knockInterval = setInterval(async () => {
-        try {
-          const res = await fetch(`${apiBaseUrl}/bookings/${meetId}/knock-status?guestId=${guestId}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data.status === 'approved') {
-              clearInterval(knockInterval);
-              setApprovalState('approved');
-              setInLobby(false);
-              
-              // Load Jitsi Call
-              await loadJitsiScript();
-              setJitsiLoaded(true);
-
-              setTimeout(() => {
-                if (!jitsiContainerRef.current) return;
-                const domain = 'meet.jit.si';
-                const options = {
-                  roomName: `DigitalGuru-1on1-${meetId}`,
-                  width: '100%',
-                  height: '100%',
-                  parentNode: jitsiContainerRef.current,
-                  userInfo: { displayName: name },
-                  configOverwrite: {
-                    startWithAudioMuted: !micActive,
-                    startWithVideoMuted: !cameraActive,
-                    prejoinPageEnabled: false,
-                    disableDeepLinking: true,
-                    toolbarButtons: []
-                  }
-                };
-                const api = new window.JitsiMeetExternalAPI(domain, options);
-                jitsiApiRef.current = api;
-                api.addEventListener('videoConferenceLeft', () => handleLeave());
-              }, 200);
-
-            } else if (data.status === 'declined') {
-              clearInterval(knockInterval);
-              setApprovalState('declined');
-            }
-          }
-        } catch (err) {
-          console.error('Failed to check knock status:', err);
-        }
-      }, 3000);
-    }
-
-    return () => {
-      if (presenceInterval) clearInterval(presenceInterval);
-      if (knockInterval) clearInterval(knockInterval);
-    };
-  }, [approvalState, isHost, meetId]);
-
-  // Format Timer
+  // Helper: Format Timer
   const formatTimer = (totalSeconds) => {
     const hrs = Math.floor(totalSeconds / 3600);
     const mins = Math.floor((totalSeconds % 3600) / 60);
@@ -270,7 +104,7 @@ export default function MeetingRoom({ meetId, onLeave }) {
     ].filter(Boolean).join(':');
   };
 
-  // Load Jitsi API script
+  // Helper: Load Jitsi API script
   const loadJitsiScript = () => {
     return new Promise((resolve) => {
       if (window.JitsiMeetExternalAPI) {
@@ -285,7 +119,16 @@ export default function MeetingRoom({ meetId, onLeave }) {
     });
   };
 
-  // Join meeting room
+  // Helper: Cleanup Jitsi instance & leave
+  const handleLeave = useCallback(() => {
+    if (jitsiApiRef.current) {
+      jitsiApiRef.current.dispose();
+      jitsiApiRef.current = null;
+    }
+    onLeave(isHost);
+  }, [isHost, onLeave]);
+
+  // Helper: Join meeting room
   const handleJoin = async (e) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -350,15 +193,6 @@ export default function MeetingRoom({ meetId, onLeave }) {
       // Guest checks host presence
       setApprovalState('checking_host');
     }
-  };
-
-  // Cleanup Jitsi instance
-  const handleLeave = () => {
-    if (jitsiApiRef.current) {
-      jitsiApiRef.current.dispose();
-      jitsiApiRef.current = null;
-    }
-    onLeave(isHost);
   };
 
   // State toggle helpers for live Jitsi call
@@ -461,6 +295,176 @@ export default function MeetingRoom({ meetId, onLeave }) {
     element.click();
     document.body.removeChild(element);
   };
+
+  // Timer Effect
+  useEffect(() => {
+    if (inLobby) return;
+    const interval = setInterval(() => {
+      setSecondsElapsed(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [inLobby]);
+
+  // Load meeting/booking data from server
+  useEffect(() => {
+    const fetchBookingDetails = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/admin/bookings`);
+        if (!res.ok) throw new Error('Failed to fetch bookings');
+        const bookings = await res.json();
+        const found = bookings.find(b => b.id === meetId);
+        if (found) {
+          setBookingData(found);
+          setNotes(found.notes || '');
+          if (found.roadmapProgress) {
+            setRoadmapProgress(found.roadmapProgress);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading booking data:', err);
+      }
+    };
+    fetchBookingDetails();
+  }, [meetId]);
+
+  // Host heartbeat and waiting list polling
+  useEffect(() => {
+    if (inLobby || !isHost) return;
+
+    // Heartbeat every 4 seconds
+    const heartbeatInterval = setInterval(async () => {
+      try {
+        await fetch(`${apiBaseUrl}/bookings/${meetId}/host-heartbeat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (err) {
+        console.error('Host heartbeat failed:', err);
+      }
+    }, 4000);
+
+    // Initial heartbeat
+    fetch(`${apiBaseUrl}/bookings/${meetId}/host-heartbeat`, { method: 'POST' });
+
+    // Poll waiting list status every 3 seconds
+    const pollGuestsInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/bookings/${meetId}/status`);
+        if (res.ok) {
+          const status = await res.json();
+          setWaitingGuests(status.waitingGuests || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch waiting guests:', err);
+      }
+    }, 3000);
+
+    return () => {
+      clearInterval(heartbeatInterval);
+      clearInterval(pollGuestsInterval);
+    };
+  }, [inLobby, isHost, meetId]);
+
+  // Auto-switch to Lobby tab for Host when someone knocks
+  useEffect(() => {
+    if (!isHost) return;
+    const waitingCount = waitingGuests.filter(g => g.status === 'waiting').length;
+    if (waitingCount > prevWaitingCount) {
+      Promise.resolve().then(() => {
+        setActiveTab('lobby');
+      });
+    }
+    Promise.resolve().then(() => {
+      setPrevWaitingCount(waitingCount);
+    });
+  }, [waitingGuests, isHost, prevWaitingCount]);
+
+  // Guest checking host presence and knock status
+  useEffect(() => {
+    if (isHost || approvalState === 'idle' || approvalState === 'approved') return;
+
+    let presenceInterval;
+    let knockInterval;
+
+    if (approvalState === 'checking_host' || approvalState === 'waiting_host') {
+      presenceInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`${apiBaseUrl}/bookings/${meetId}/status`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.hostPresent) {
+              clearInterval(presenceInterval);
+              // Host is present, send knock request
+              setApprovalState('waiting_approval');
+              await fetch(`${apiBaseUrl}/bookings/${meetId}/knock`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ guestId, name })
+              });
+            } else {
+              setApprovalState('waiting_host');
+            }
+          }
+        } catch (err) {
+          console.error('Failed to check host presence:', err);
+        }
+      }, 3000);
+    }
+
+    if (approvalState === 'waiting_approval') {
+      knockInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`${apiBaseUrl}/bookings/${meetId}/knock-status?guestId=${guestId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.status === 'approved') {
+              clearInterval(knockInterval);
+              setApprovalState('approved');
+              setInLobby(false);
+              
+              // Load Jitsi Call
+              await loadJitsiScript();
+              setJitsiLoaded(true);
+
+              setTimeout(() => {
+                if (!jitsiContainerRef.current) return;
+                const domain = 'meet.jit.si';
+                const options = {
+                  roomName: `DigitalGuru-1on1-${meetId}`,
+                  width: '100%',
+                  height: '100%',
+                  parentNode: jitsiContainerRef.current,
+                  userInfo: { displayName: name },
+                  configOverwrite: {
+                    startWithAudioMuted: !micActive,
+                    startWithVideoMuted: !cameraActive,
+                    prejoinPageEnabled: false,
+                    disableDeepLinking: true,
+                    toolbarButtons: []
+                  }
+                };
+                const api = new window.JitsiMeetExternalAPI(domain, options);
+                jitsiApiRef.current = api;
+                api.addEventListener('videoConferenceLeft', () => handleLeave());
+              }, 200);
+
+            } else if (data.status === 'declined') {
+              clearInterval(knockInterval);
+              setApprovalState('declined');
+            }
+          }
+        } catch (err) {
+          console.error('Failed to check knock status:', err);
+        }
+      }, 3000);
+    }
+
+    return () => {
+      if (presenceInterval) clearInterval(presenceInterval);
+      if (knockInterval) clearInterval(knockInterval);
+    };
+  }, [approvalState, isHost, meetId, name, guestId, micActive, cameraActive, handleLeave]);
+
 
   // Guest Knock Lobby Screens
   if (!isHost && approvalState === 'checking_host') {

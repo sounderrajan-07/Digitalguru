@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, BookOpen, Users, Zap, RefreshCw, ArrowLeft, Key, Save, Lock, MessageSquare, Trash2 } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Calendar, BookOpen, Users, Zap, RefreshCw, ArrowLeft, Lock, Trash2 } from 'lucide-react';
 import './AdminDashboard.css';
+
+const apiBaseUrl = window.location.origin.includes('localhost:5173')
+  ? 'http://localhost:5000/api'
+  : '/api';
 
 export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -20,10 +24,6 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
   const [passcodeSuccess, setPasscodeSuccess] = useState('');
   const [passcodeErr, setPasscodeErr] = useState('');
   const [updatingPasscode, setUpdatingPasscode] = useState(false);
-
-  const apiBaseUrl = window.location.origin.includes('localhost:5173')
-    ? 'http://localhost:5000/api'
-    : '/api';
 
   // Verify PIN
   const handlePinSubmit = async (e) => {
@@ -76,7 +76,7 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
   };
 
   // Fetch all bookings from admin endpoint
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`${apiBaseUrl}/admin/bookings`);
@@ -88,12 +88,14 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    fetchBookings();
+    Promise.resolve().then(() => {
+      fetchBookings();
+    });
 
     // Poll logs every 10 seconds silently
     const interval = setInterval(() => {
@@ -112,7 +114,7 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, fetchBookings]);
 
   // Generate an instant meeting room ID and URL
   const handleGenerateInstantMeet = (e) => {

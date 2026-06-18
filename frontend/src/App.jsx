@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Check, Lock, Mail, Clock, ArrowRight, Shield, Video, HelpCircle, Phone, Award, CheckCircle, GraduationCap, Briefcase,MapPin } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Mail, ArrowRight, Shield, Video, Phone, Award, CheckCircle, GraduationCap, Briefcase, MapPin } from 'lucide-react';
 import MeetingRoom from './components/MeetingRoom';
 import AdminDashboard from './components/AdminDashboard';
 
@@ -79,7 +79,7 @@ export default function App() {
         }
         return lastPart;
       }
-    } catch (e) {
+    } catch {
       // Ignore error
     }
     return input.trim();
