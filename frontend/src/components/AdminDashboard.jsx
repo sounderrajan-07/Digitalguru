@@ -170,8 +170,8 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
             <img src="/Logo1.png" alt="Logo" className="lock-logo" />
             <div className="lock-badge">Secure Console</div>
           </div>
-          <h2 className="lobby-title" style={{ marginTop: '1rem' }}>Host Verification</h2>
-          <p className="lobby-subtitle" style={{ marginBottom: '2rem' }}>This section is protected for Host's meeting management console.</p>
+          <h2 className="lobby-title" style={{ marginTop: '1rem', textAlign: 'center' }}>Host Verification</h2>
+          <p className="lobby-subtitle" style={{ marginBottom: '2rem', textAlign: 'center' }}>This section is protected for Host's meeting management console.</p>
           
           <form onSubmit={handlePinSubmit}>
             <div className="form-group" style={{ textAlign: 'left' }}>

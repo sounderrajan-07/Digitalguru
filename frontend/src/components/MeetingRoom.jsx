@@ -35,8 +35,8 @@ function LobbyWaitingScreen({ message, details, showBackHome, onLeave }) {
             <img src="/Logo1.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
         </div>
-        <h2 className="lobby-title" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>{message}</h2>
-        <p className="lobby-subtitle" style={{ fontSize: '1.05rem', color: 'var(--text-light-muted)', marginBottom: '2rem' }}>{details}</p>
+        <h2 className="lobby-title" style={{ fontSize: '1.75rem', marginBottom: '1rem', textAlign: 'center' }}>{message}</h2>
+        <p className="lobby-subtitle" style={{ fontSize: '1.05rem', color: 'var(--text-light-muted)', marginBottom: '2rem', textAlign: 'center' }}>{details}</p>
         
         {showBackHome ? (
           <button onClick={() => onLeave(false)} className="btn btn-primary btn-full-width">
