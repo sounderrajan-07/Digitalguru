@@ -343,16 +343,16 @@ img {
 .nav-actions .btn {
   padding: 0.8rem 1.6rem;
   font-size: 0.95rem;
-  background-color: #ffffff !important;
-  color: var(--color-blue-brand) !important;
+  background: linear-gradient(135deg, var(--color-yellow-accent) 0%, var(--color-orange-brand) 100%) !important;
+  color: #ffffff !important;
   border: 1.5px solid #ffffff !important;
   box-shadow: none;
 }
 
 .nav-actions .btn:hover {
-  background-color: var(--color-yellow-accent) !important;
-  color: #00112c !important;
-  border-color: var(--color-yellow-accent) !important;
+  background: linear-gradient(135deg, var(--color-yellow-accent) 20%, var(--color-orange-hover) 100%) !important;
+  color: #0f172a !important;
+  border-color: #ffffff !important;
 }
 
 .menu-toggle {
