@@ -12,7 +12,6 @@ import {
   UserPlus, 
   PhoneOff, 
   Clock, 
-  Lock, 
   Check, 
   Download, 
   Save, 
@@ -32,8 +31,8 @@ function LobbyWaitingScreen({ message, details, showBackHome, onLeave }) {
           <span></span>
           <span></span>
           <span></span>
-          <div className="avatar-letter">
-            <Lock size={32} color="var(--color-blue-brand)" />
+          <div className="avatar-letter" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img src="/Logo1.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
         </div>
         <h2 className="lobby-title" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>{message}</h2>
@@ -171,7 +170,8 @@ export default function MeetingRoom({ meetId, onLeave }) {
           height: '100%',
           parentNode: jitsiContainerRef.current,
           userInfo: {
-            displayName: `Advisor (Host)`
+            displayName: `Advisor (Host)`,
+            avatarURL: window.location.origin + '/Logo1.png'
           },
           configOverwrite: {
             startWithAudioMuted: !micActive,
@@ -434,7 +434,10 @@ export default function MeetingRoom({ meetId, onLeave }) {
                   width: '100%',
                   height: '100%',
                   parentNode: jitsiContainerRef.current,
-                  userInfo: { displayName: name },
+                  userInfo: { 
+                    displayName: name,
+                    avatarURL: window.location.origin + '/Logo1.png'
+                  },
                   configOverwrite: {
                     startWithAudioMuted: !micActive,
                     startWithVideoMuted: !cameraActive,
@@ -519,7 +522,9 @@ export default function MeetingRoom({ meetId, onLeave }) {
                       <span></span>
                       <span></span>
                       <span></span>
-                      <div className="avatar-letter">{isHost ? 'A' : (name ? name.charAt(0).toUpperCase() : 'G')}</div>
+                      <div className="avatar-letter" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src="/Logo1.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
                     </div>
                     <span className="preview-feed-label">Camera is On</span>
                   </div>
