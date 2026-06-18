@@ -177,8 +177,16 @@ export default function MeetingRoom({ meetId, onLeave }) {
             startWithAudioMuted: !micActive,
             startWithVideoMuted: !cameraActive,
             prejoinPageEnabled: false,
+            prejoinConfig: {
+              enabled: false
+            },
             disableDeepLinking: true,
             toolbarButtons: []
+          },
+          interfaceConfigOverwrite: {
+            TOOLBAR_BUTTONS: [],
+            SHOW_JITSI_WATERMARK: false,
+            SHOW_WATERMARK_FOR_GUESTS: false
           }
         };
 
@@ -442,8 +450,16 @@ export default function MeetingRoom({ meetId, onLeave }) {
                     startWithAudioMuted: !micActive,
                     startWithVideoMuted: !cameraActive,
                     prejoinPageEnabled: false,
+                    prejoinConfig: {
+                      enabled: false
+                    },
                     disableDeepLinking: true,
                     toolbarButtons: []
+                  },
+                  interfaceConfigOverwrite: {
+                    TOOLBAR_BUTTONS: [],
+                    SHOW_JITSI_WATERMARK: false,
+                    SHOW_WATERMARK_FOR_GUESTS: false
                   }
                 };
                 const api = new window.JitsiMeetExternalAPI(domain, options);
@@ -495,8 +511,8 @@ export default function MeetingRoom({ meetId, onLeave }) {
           <span className="meet-logo-text">Session Workspace</span>
         </div>
         {!inLobby && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-light-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <div className="meet-header-info">
+            <span className="meet-timer">
               <Clock size={16} />
               <span>Time: {formatTimer(secondsElapsed)}</span>
             </span>
@@ -716,7 +732,7 @@ export default function MeetingRoom({ meetId, onLeave }) {
                   <button 
                     onClick={() => setActiveTab('lobby')}
                     className={`tab-btn ${activeTab === 'lobby' ? 'active' : ''}`}
-                    style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                    style={{ position: 'relative' }}
                   >
                     <Users size={16} />
                     <span>Lobby</span>
@@ -730,7 +746,6 @@ export default function MeetingRoom({ meetId, onLeave }) {
                 <button 
                   onClick={() => setActiveTab('roadmap')}
                   className={`tab-btn ${activeTab === 'roadmap' ? 'active' : ''}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                 >
                   <CheckSquare size={16} />
                   <span>Roadmap</span>
@@ -738,7 +753,6 @@ export default function MeetingRoom({ meetId, onLeave }) {
                 <button 
                   onClick={() => setActiveTab('notes')}
                   className={`tab-btn ${activeTab === 'notes' ? 'active' : ''}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                 >
                   <FileText size={16} />
                   <span>Notes</span>
@@ -746,7 +760,6 @@ export default function MeetingRoom({ meetId, onLeave }) {
                 <button 
                   onClick={() => setActiveTab('info')}
                   className={`tab-btn ${activeTab === 'info' ? 'active' : ''}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                 >
                   <Info size={16} />
                   <span>Info</span>

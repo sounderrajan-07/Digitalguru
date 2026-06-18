@@ -44,8 +44,12 @@
 }
 
 .meet-logo img {
-  height: 72px;
+  height: 75px;
+  width: auto;
+  background-color: #ffffff;
+  padding: 5px;
   border-radius: var(--border-radius-sm);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 
 .meet-logo-text {
@@ -69,6 +73,22 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.meet-header-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.meet-timer {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .status-dot {
@@ -578,7 +598,7 @@
 
 .tab-btn {
   flex: 1;
-  padding: 1.25rem 0;
+  padding: 1.25rem 0.5rem;
   text-align: center;
   font-size: 0.85rem;
   font-weight: 700;
@@ -590,6 +610,10 @@
   cursor: pointer;
   transition: var(--transition);
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
 
 .tab-btn:hover {
@@ -903,16 +927,43 @@
   }
   
   .meet-header {
-    height: 80px;
-    padding: 0 1rem;
+    height: auto;
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  .meet-header-info {
+    width: 100%;
+    justify-content: space-between;
+    gap: 1rem;
   }
   
   .meet-logo img {
-    height: 60px;
+    height: 50px;
   }
   
   .meet-logo-text {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
+  }
+
+  .tab-btn {
+    padding: 0.85rem 0.25rem;
+    font-size: 0.725rem;
+    gap: 0.25rem;
+    letter-spacing: 0.02em;
+  }
+
+  .tab-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Hide screen share and tile layout toggle on small mobile viewports to prevent controls overlap */
+  .video-action-buttons button:nth-child(3),
+  .video-action-buttons button:nth-child(4) {
+    display: none !important;
   }
 }
 
