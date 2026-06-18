@@ -186,7 +186,7 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
                 required
                 autoFocus
               />
-              {pinError && <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '0.5rem', fontWeight: 600 }}>{pinError}</p>}
+              {pinError && <p style={{ color: 'var(--color-orange-brand)', fontSize: '0.85rem', marginTop: '0.5rem', fontWeight: 600 }}>{pinError}</p>}
             </div>
             
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
@@ -367,8 +367,8 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
                     required
                   />
                 </div>
-                {passcodeSuccess && <p style={{ color: '#22c55e', fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 600 }}>{passcodeSuccess}</p>}
-                {passcodeErr && <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 600 }}>{passcodeErr}</p>}
+                 {passcodeSuccess && <p style={{ color: 'var(--color-blue-brand)', fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 600 }}>{passcodeSuccess}</p>}
+                 {passcodeErr && <p style={{ color: 'var(--color-orange-brand)', fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 600 }}>{passcodeErr}</p>}
                 
                 <button type="submit" disabled={updatingPasscode} className="btn btn-primary" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                   <Lock size={16} />

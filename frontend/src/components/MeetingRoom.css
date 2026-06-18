@@ -474,9 +474,9 @@
 .secure-dot {
   width: 9px;
   height: 9px;
-  background-color: #22c55e;
+  background-color: var(--color-yellow-accent);
   border-radius: 50%;
-  box-shadow: 0 0 10px #22c55e;
+  box-shadow: 0 0 10px var(--color-yellow-accent);
 }
 
 .client-display-name {
