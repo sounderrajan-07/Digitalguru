@@ -59,15 +59,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Master list of time slots
-const MASTER_SLOTS = [
-  '10:00 AM',
-  '11:30 AM',
-  '02:00 PM',
-  '03:30 PM',
-  '05:00 PM',
-  '06:30 PM'
-];
 
 // Helper to read database
 const readBookings = () => {
@@ -99,96 +90,6 @@ const writeBookings = (bookings) => {
   }
 };
 
-// API: Get available slots for a date
-app.get('/api/bookings/slots', (req, res) => {
-  const { date } = req.query; // Expecting YYYY-MM-DD
-  
-  if (!date) {
-    return res.status(400).json({ error: 'Date parameter is required (format: YYYY-MM-DD)' });
-  }
-
-  const bookings = readBookings();
-  
-  // Find slots already booked on this day
-  const bookedSlotsForDay = bookings
-    .filter(b => b.date === date)
-    .map(b => b.time);
-
-  // Map master list to include availability status
-  const slotsResponse = MASTER_SLOTS.map(slot => ({
-    time: slot,
-    isAvailable: !bookedSlotsForDay.includes(slot)
-  }));
-
-  res.json({
-    date,
-    slots: slotsResponse
-  });
-});
-
-// API: Create a booking
-app.post('/api/bookings', (req, res) => {
-  const { name, email, phone, businessType, goal, date, time } = req.body;
-
-  // Validation
-  if (!name || !email || !phone || !businessType || !goal || !date || !time) {
-    return res.status(400).json({ error: 'All fields are required' });
-  }
-
-  const bookings = readBookings();
-
-  // Check for double booking
-  const isAlreadyBooked = bookings.some(b => b.date === date && b.time === time);
-  if (isAlreadyBooked) {
-    return res.status(400).json({ error: 'This slot has just been reserved by someone else. Please choose another date or time.' });
-  }
-
-  // Generate a mock unique Jitsi meeting ID
-  const mockMeetId = Math.random().toString(36).substring(2, 5) + '-' + 
-                      Math.random().toString(36).substring(2, 6) + '-' + 
-                      Math.random().toString(36).substring(2, 5);
-  
-  // Extract frontend origin dynamically
-  const getFrontendOrigin = (req) => {
-    const ref = req.headers.referer || req.headers.origin || 'http://localhost:5173';
-    try {
-      const parsed = new URL(ref);
-      return parsed.origin;
-    } catch (e) {
-      return 'http://localhost:5173';
-    }
-  };
-  const zoomLink = `${getFrontendOrigin(req)}/?meet=${mockMeetId}`;
-
-  // Create booking object
-  const newBooking = {
-    id: mockMeetId, // Use mockMeetId as booking id for matching direct meeting links
-    name,
-    email,
-    phone,
-    businessType,
-    goal,
-    date, // YYYY-MM-DD
-    time, // e.g. "11:30 AM"
-    zoomLink,
-    notes: '',
-    roadmapProgress: {
-      offerAudit: false,
-      trustFunnel: false,
-      salesScripts: false
-    },
-    createdAt: new Date().toISOString()
-  };
-
-  bookings.push(newBooking);
-  
-  if (writeBookings(bookings)) {
-    console.log(`[Success] New Booking confirmed for ${name} on ${date} at ${time}`);
-    res.status(201).json(newBooking);
-  } else {
-    res.status(500).json({ error: 'Failed to save booking. Please try again.' });
-  }
-});
 
 // API: Update meeting notes and roadmap progress
 app.patch('/api/bookings/:id/notes', (req, res) => {
