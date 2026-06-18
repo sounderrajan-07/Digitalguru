@@ -6,7 +6,7 @@
               radial-gradient(circle at 90% 80%, rgba(255, 78, 38, 0.03) 0%, transparent 45%),
               var(--bg-dark);
   color: var(--text-dark);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-body), 'Open Sans', sans-serif;
   padding: 8rem 2rem 4rem 2rem;
 }
 
