@@ -305,7 +305,6 @@ img {
   height: 80px;
   width: 240px;
   object-fit: contain;
-  object-position: left center;
   transition: var(--transition);
 }
 
