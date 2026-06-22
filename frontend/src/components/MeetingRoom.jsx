@@ -32,7 +32,7 @@ function LobbyWaitingScreen({ message, details, showBackHome, onLeave }) {
           <span></span>
           <span></span>
           <div className="avatar-letter" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img src="/Logo1.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src="/Logo1.webp" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
         </div>
         <h2 className="lobby-title" style={{ fontSize: '1.75rem', marginBottom: '1rem', textAlign: 'center' }}>{message}</h2>
@@ -171,7 +171,7 @@ export default function MeetingRoom({ meetId, onLeave }) {
           parentNode: jitsiContainerRef.current,
           userInfo: {
             displayName: `Advisor (Host)`,
-            avatarURL: window.location.origin + '/Logo1.png'
+            avatarURL: window.location.origin + '/Logo1.webp'
           },
           configOverwrite: {
             startWithAudioMuted: !micActive,
@@ -444,7 +444,7 @@ export default function MeetingRoom({ meetId, onLeave }) {
                   parentNode: jitsiContainerRef.current,
                   userInfo: { 
                     displayName: name,
-                    avatarURL: window.location.origin + '/Logo1.png'
+                    avatarURL: window.location.origin + '/Logo1.webp'
                   },
                   configOverwrite: {
                     startWithAudioMuted: !micActive,
@@ -507,7 +507,7 @@ export default function MeetingRoom({ meetId, onLeave }) {
       {/* Header */}
       <header className="meet-header">
         <div className="meet-logo">
-          <img src="/Logo1.png" alt="Logo" />
+          <img src="/Logo1.webp" alt="Logo" />
           <span className="meet-logo-text">Session Workspace</span>
         </div>
         {!inLobby && (
@@ -539,7 +539,7 @@ export default function MeetingRoom({ meetId, onLeave }) {
                       <span></span>
                       <span></span>
                       <div className="avatar-letter" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <img src="/Logo1.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src="/Logo1.webp" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </div>
                     </div>
                     <span className="preview-feed-label">Camera is On</span>

@@ -46,10 +46,6 @@
 .meet-logo img {
   height: 75px;
   width: auto;
-  background-color: #ffffff;
-  padding: 5px;
-  border-radius: var(--border-radius-sm);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 
 .meet-logo-text {

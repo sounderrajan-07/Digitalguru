@@ -167,7 +167,7 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
       <div className="admin-lock-screen">
         <div className="lock-card glass-card">
           <div className="lock-logo-container">
-            <img src="/Logo1.png" alt="Logo" className="lock-logo" />
+            <img src="/Logo1.webp" alt="Logo" className="lock-logo" />
             <div className="lock-badge">Secure Console</div>
           </div>
           <h2 className="lobby-title" style={{ marginTop: '1rem', textAlign: 'center' }}>Host Verification</h2>

@@ -120,7 +120,7 @@ export default function App() {
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
         <div className="container">
           <a href="#" className="nav-logo" onClick={closeMobileMenu}>
-            <img src="/Logo1.png" alt="Logo" />
+            <img src="/Logo1.webp" alt="Logo" />
           </a>
           <ul className={`nav-menu ${menuActive ? 'active' : ''}`}>
             <li><a href="#about" className="nav-link" onClick={closeMobileMenu}>About Us</a></li>
@@ -452,7 +452,7 @@ export default function App() {
           <div className="footer-top">
             <div className="footer-brand">
               <a href="#" className="footer-logo">
-                <img src="/Logo1.png" alt="Logo" />
+                <img src="/Logo1.webp" alt="Logo" />
               </a>
               <p className="footer-desc">
                 Architecting custom customer acquisition engines and scaling operations for high-ticket service brands.
