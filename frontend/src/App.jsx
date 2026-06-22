@@ -48,7 +48,7 @@ export default function App() {
         try { observer.unobserve(el); } catch (e) {}
       });
     };
-  }, []);
+  }, [currentMeetId, isAdminView]);
 
   const toggleMobileMenu = () => {
     setMenuActive(!menuActive);
