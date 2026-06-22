@@ -305,6 +305,7 @@ img {
   height: 80px;
   width: 240px;
   object-fit: contain;
+  object-position: left center;
   transition: var(--transition);
 }
 
@@ -408,6 +409,7 @@ img {
   height: 85px;
   width: 255px;
   object-fit: contain;
+  object-position: left center;
 }
 
 .footer-logo-text {

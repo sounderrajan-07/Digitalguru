@@ -47,6 +47,7 @@
   height: 75px;
   width: 225px;
   object-fit: contain;
+  object-position: left center;
 }
 
 .meet-logo-text {
