@@ -45,7 +45,8 @@
 
 .meet-logo img {
   height: 75px;
-  width: auto;
+  width: 225px;
+  object-fit: contain;
 }
 
 .meet-logo-text {
@@ -985,4 +986,198 @@
 .guest-request-card:hover {
   background: rgba(255, 255, 255, 0.08) !important;
   border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Sidebar Chat Tab Styles */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1;
+}
+
+.chat-messages-list {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-right: 0.25rem;
+  min-height: 250px;
+}
+
+.chat-empty-state {
+  color: var(--text-light-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 3rem;
+  font-style: italic;
+}
+
+.chat-bubble-wrapper {
+  max-width: 85%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  position: relative;
+  word-wrap: break-word;
+  animation: scaleUp 0.25s ease-out;
+}
+
+.chat-bubble-wrapper.chat-me {
+  align-self: flex-end;
+  background-color: var(--color-blue-brand);
+  color: #ffffff;
+  border-bottom-right-radius: 2px;
+  box-shadow: var(--shadow-sm);
+}
+
+.chat-bubble-wrapper.chat-other {
+  align-self: flex-start;
+  background-color: #f8fafc;
+  color: var(--text-dark);
+  border: 1px solid #e2e8f0;
+  border-bottom-left-radius: 2px;
+  box-shadow: var(--shadow-sm);
+}
+
+.chat-bubble-sender {
+  font-size: 0.7rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.chat-me .chat-bubble-sender {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.chat-other .chat-bubble-sender {
+  color: var(--color-blue-brand);
+}
+
+.chat-bubble-content {
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.chat-bubble-time {
+  font-size: 0.65rem;
+  text-align: right;
+  margin-top: 0.35rem;
+  opacity: 0.65;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 0.5rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1rem;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+  outline: none;
+  transition: var(--transition);
+}
+
+.chat-input:focus {
+  border-color: var(--color-blue-brand);
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.15);
+}
+
+.chat-btn-send {
+  padding: 0.75rem 1.25rem !important;
+  font-size: 0.9rem !important;
+  border-radius: 8px !important;
+}
+
+/* Markdown Notes Editor Styles */
+.notes-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.notes-toggle-buttons {
+  display: flex;
+  background-color: #f1f5f9;
+  padding: 0.2rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.notes-toggle-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: none;
+  background-color: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.notes-toggle-btn.active {
+  background-color: #ffffff;
+  color: var(--color-blue-brand);
+  box-shadow: var(--shadow-sm);
+}
+
+.notes-markdown-toolbar {
+  display: flex;
+  gap: 0.35rem;
+  background-color: #f8fafc;
+  padding: 0.4rem;
+  border: 1.5px solid #cbd5e1;
+  border-bottom: none;
+  border-top-left-radius: var(--border-radius-sm);
+  border-top-right-radius: var(--border-radius-sm);
+}
+
+.notes-markdown-toolbar button {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: var(--text-dark);
+  font-weight: bold;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: var(--transition);
+}
+
+.notes-markdown-toolbar button:hover {
+  background-color: var(--color-blue-light);
+  border-color: var(--color-blue-brand);
+  color: var(--color-blue-brand);
+}
+
+.notes-textarea {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+.notes-preview-container {
+  flex: 1;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: var(--border-radius-md);
+  padding: 1.25rem;
+  color: var(--text-dark);
+  min-height: 280px;
+  overflow-y: auto;
+  line-height: 1.6;
+  text-align: left;
+  margin-bottom: 1.5rem;
 }

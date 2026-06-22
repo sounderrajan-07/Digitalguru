@@ -221,6 +221,40 @@ app.post('/api/bookings/:id/host-heartbeat', (req, res) => {
   res.json({ success: true, hostLastActive: booking.hostLastActive });
 });
 
+// API: Get chat history for meeting session
+app.get('/api/bookings/:id/chat', (req, res) => {
+  const { id } = req.params;
+  const { booking } = getOrCreateBooking(id);
+  res.json(booking.chatHistory || []);
+});
+
+// API: Send chat message in meeting session
+app.post('/api/bookings/:id/chat', (req, res) => {
+  const { id } = req.params;
+  const { sender, text } = req.body;
+
+  if (!sender || !text) {
+    return res.status(400).json({ error: 'sender and text are required' });
+  }
+
+  const { booking, bookings } = getOrCreateBooking(id);
+
+  if (!booking.chatHistory) {
+    booking.chatHistory = [];
+  }
+
+  const message = {
+    sender,
+    text,
+    timestamp: new Date().toISOString()
+  };
+
+  booking.chatHistory.push(message);
+  writeBookings(bookings);
+
+  res.json({ success: true, message });
+});
+
 // API: Client knocks to join meeting
 app.post('/api/bookings/:id/knock', (req, res) => {
   const { id } = req.params;

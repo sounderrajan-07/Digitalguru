@@ -23,6 +23,33 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Scroll Reveal Observer
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    const elements = document.querySelectorAll('.reveal-on-scroll');
+    elements.forEach(el => observer.observe(el));
+
+    return () => {
+      elements.forEach(el => {
+        try { observer.unobserve(el); } catch (e) {}
+      });
+    };
+  }, []);
+
   const toggleMobileMenu = () => {
     setMenuActive(!menuActive);
   };
@@ -143,7 +170,7 @@ export default function App() {
       <section id="about" className="about-us-section">
         <div className="container">
           <div className="about-us-grid">
-            <section className="company-info-section">
+            <section className="company-info-section reveal-on-scroll">
               <div className="premium-badge">
                 <span className="badge-pulse"></span> About Jai Ghurudeva Academy
               </div>
@@ -176,7 +203,7 @@ export default function App() {
               </div>
             </section>
 
-            <section className="pedagogy-section">
+            <section className="pedagogy-section reveal-on-scroll">
               <h3 className="pedagogy-title">Foundations of Our Pedagogy</h3>
               
               <div className="feature-bullets">
@@ -227,7 +254,7 @@ export default function App() {
       {/* Courses Section */}
       <section id="courses" className="courses-section">
         <div className="container">
-          <div className="courses-header">
+          <div className="courses-header reveal-on-scroll">
             <div className="premium-badge">
               <span className="badge-pulse"></span> Our Specialized Courses
             </div>
@@ -241,7 +268,7 @@ export default function App() {
 
           <div className="courses-grid">
             {/* Cyber Security */}
-            <div className="course-card cybersecurity">
+            <div className="course-card cybersecurity reveal-on-scroll">
               <div className="course-card-header">
                 <div className="course-icon-container">
                   <Shield size={28} />
@@ -272,7 +299,7 @@ export default function App() {
             </div>
 
             {/* AI Marketing */}
-            <div className="course-card aimarketing">
+            <div className="course-card aimarketing reveal-on-scroll">
               <div className="course-card-header">
                 <div className="course-icon-container">
                   <Brain size={28} />
@@ -303,7 +330,7 @@ export default function App() {
             </div>
 
             {/* Data Science */}
-            <div className="course-card datascience">
+            <div className="course-card datascience reveal-on-scroll">
               <div className="course-card-header">
                 <div className="course-icon-container">
                   <Database size={28} />
@@ -334,7 +361,7 @@ export default function App() {
             </div>
 
             {/* Web Development */}
-            <div className="course-card webdev">
+            <div className="course-card webdev reveal-on-scroll">
               <div className="course-card-header">
                 <div className="course-icon-container">
                   <Code size={28} />
@@ -365,7 +392,7 @@ export default function App() {
             </div>
 
             {/* Creative Design */}
-            <div className="course-card design">
+            <div className="course-card design reveal-on-scroll">
               <div className="course-card-header">
                 <div className="course-icon-container">
                   <Palette size={28} />
@@ -403,7 +430,7 @@ export default function App() {
         <div className="container">
           <div className="portal-join-layout">
             <section className="join-session-container">
-              <div className="join-card glass-card floating-effect">
+              <div className="join-card glass-card floating-effect reveal-on-scroll">
                 <div className="join-card-header">
                   <div className="video-icon-wrapper">
                     <Video size={24} color="var(--color-blue-brand)" />

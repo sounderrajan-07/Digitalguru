@@ -265,6 +265,101 @@ export default function AdminDashboard({ onStartMeeting, onBackToHome }) {
           </div>
         </section>
 
+        {/* Visual Analytics Section */}
+        <section className="visual-analytics-row">
+          <div className="admin-card visual-card">
+            <h3 className="admin-card-title" style={{ borderLeftColor: 'var(--color-blue-brand)' }}>Consultation Completion Rate</h3>
+            <div className="chart-progress-ring-container">
+              <svg className="progress-ring" width="120" height="120">
+                <circle
+                  className="progress-ring__circle-bg"
+                  stroke="#e2e8f0"
+                  strokeWidth="8"
+                  fill="transparent"
+                  r="50"
+                  cx="60"
+                  cy="60"
+                />
+                <circle
+                  className="progress-ring__circle"
+                  stroke="url(#blueGradient)"
+                  strokeWidth="8"
+                  strokeDasharray="314.16"
+                  strokeDashoffset={314.16 - (314.16 * (totalBookings > 0 ? (completedSessions / totalBookings) : 0))}
+                  strokeLinecap="round"
+                  fill="transparent"
+                  r="50"
+                  cx="60"
+                  cy="60"
+                />
+                <defs>
+                  <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="var(--color-blue-brand)" />
+                    <stop offset="100%" stopColor="var(--color-yellow-accent)" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="progress-ring-text">
+                <span className="progress-percent">{totalBookings > 0 ? Math.round((completedSessions / totalBookings) * 100) : 0}%</span>
+                <span className="progress-label">{completedSessions}/{totalBookings} Done</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-card visual-card">
+            <h3 className="admin-card-title" style={{ borderLeftColor: 'var(--color-orange-brand)' }}>Session Type Distribution</h3>
+            <div className="chart-bar-container">
+              <div className="bar-wrapper">
+                <div className="bar-track">
+                  <div 
+                    className="bar-fill bar-agency" 
+                    style={{ height: `${totalBookings > 0 ? (bookings.filter(b => b.businessType === 'agency').length / Math.max(...['agency', 'coaching', 'freelance', 'instant'].map(type => bookings.filter(b => b.businessType === type).length), 1)) * 100 : 0}%` }}
+                  >
+                    <span className="bar-val">{bookings.filter(b => b.businessType === 'agency').length}</span>
+                  </div>
+                </div>
+                <span className="bar-label">Agency</span>
+              </div>
+
+              <div className="bar-wrapper">
+                <div className="bar-track">
+                  <div 
+                    className="bar-fill bar-coaching" 
+                    style={{ height: `${totalBookings > 0 ? (bookings.filter(b => b.businessType === 'coaching').length / Math.max(...['agency', 'coaching', 'freelance', 'instant'].map(type => bookings.filter(b => b.businessType === type).length), 1)) * 100 : 0}%` }}
+                  >
+                    <span className="bar-val">{bookings.filter(b => b.businessType === 'coaching').length}</span>
+                  </div>
+                </div>
+                <span className="bar-label">Coaching</span>
+              </div>
+
+              <div className="bar-wrapper">
+                <div className="bar-track">
+                  <div 
+                    className="bar-fill bar-freelance" 
+                    style={{ height: `${totalBookings > 0 ? (bookings.filter(b => b.businessType === 'freelance').length / Math.max(...['agency', 'coaching', 'freelance', 'instant'].map(type => bookings.filter(b => b.businessType === type).length), 1)) * 100 : 0}%` }}
+                  >
+                    <span className="bar-val">{bookings.filter(b => b.businessType === 'freelance').length}</span>
+                  </div>
+                </div>
+                <span className="bar-label">Freelance</span>
+              </div>
+
+              <div className="bar-wrapper">
+                <div className="bar-track">
+                  <div 
+                    className="bar-fill bar-instant" 
+                    style={{ height: `${totalBookings > 0 ? (bookings.filter(b => b.businessType === 'instant').length / Math.max(...['agency', 'coaching', 'freelance', 'instant'].map(type => bookings.filter(b => b.businessType === type).length), 1)) * 100 : 0}%` }}
+                  >
+                    <span className="bar-val">{bookings.filter(b => b.businessType === 'instant').length}</span>
+                  </div>
+                </div>
+                <span className="bar-label">Instant</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Dashboard Main Grid */}
         <div className="dashboard-grid">
           

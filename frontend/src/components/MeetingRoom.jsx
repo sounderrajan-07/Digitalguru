@@ -15,7 +15,8 @@ import {
   Check, 
   Download, 
   Save, 
-  Users 
+  Users,
+  MessageSquare
 } from 'lucide-react';
 import './MeetingRoom.css';
 
@@ -88,6 +89,15 @@ export default function MeetingRoom({ meetId, onLeave }) {
   const [waitingGuests, setWaitingGuests] = useState([]);
   const [prevWaitingCount, setPrevWaitingCount] = useState(0);
 
+  // Live Chat states
+  const [chatMessages, setChatMessages] = useState([]);
+  const [newMessageText, setNewMessageText] = useState('');
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
+
+  // Markdown Notes states and refs
+  const [notesEditMode, setNotesEditMode] = useState('write');
+  const notesTextareaRef = useRef(null);
+
   const jitsiContainerRef = useRef(null);
   const jitsiApiRef = useRef(null);
 
@@ -101,6 +111,77 @@ export default function MeetingRoom({ meetId, onLeave }) {
       String(mins).padStart(2, '0'),
       String(secs).padStart(2, '0')
     ].filter(Boolean).join(':');
+  };
+
+  // Helper: Insert Markdown tags at cursor
+  const insertMarkdown = (syntax, placeholder = '') => {
+    const textarea = notesTextareaRef.current;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    
+    const selectedText = text.substring(start, end) || placeholder;
+    let replacement = '';
+    
+    if (syntax === 'bold') {
+      replacement = `**${selectedText}**`;
+    } else if (syntax === 'italic') {
+      replacement = `*${selectedText}*`;
+    } else if (syntax === 'heading') {
+      replacement = `### ${selectedText}`;
+    } else if (syntax === 'list') {
+      replacement = `\n- [ ] ${selectedText}`;
+    }
+    
+    const newNotes = text.substring(0, start) + replacement + text.substring(end);
+    setNotes(newNotes);
+    
+    // Reset focus and cursor pos
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = start + replacement.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 50);
+  };
+
+  // Helper: Basic Regex Markdown parser for Live Preview
+  const parseMarkdownToHtml = (markdownText) => {
+    if (!markdownText) return '<p style="color: var(--text-light-muted); font-style: italic;">No notes draft written yet.</p>';
+    
+    let html = markdownText
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+      
+    // Headings
+    html = html.replace(/^### (.*?)$/gm, '<h4 style="margin: 1.25rem 0 0.5rem 0; color: #ffffff; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.25rem;">$1</h4>');
+    html = html.replace(/^## (.*?)$/gm, '<h3 style="margin: 1.5rem 0 0.5rem 0; color: #ffffff; font-weight: 850;">$1</h3>');
+    html = html.replace(/^# (.*?)$/gm, '<h2 style="margin: 1.75rem 0 0.75rem 0; color: #ffffff; font-weight: 900;">$1</h2>');
+    
+    // Bold
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Italic
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Checklist items
+    html = html.replace(/^- \[x\] (.*?)$/gm, '<div style="display: flex; align-items: center; gap: 0.5rem; margin: 0.45rem 0; color: var(--color-yellow-accent);"><span style="font-weight: bold;">[✓]</span> <s>$1</s></div>');
+    html = html.replace(/^- \[ \] (.*?)$/gm, '<div style="display: flex; align-items: center; gap: 0.45rem; margin: 0.45rem 0;"><span style="font-weight: bold; color: var(--color-blue-brand);">[ ]</span> $1</div>');
+    
+    // General Lists
+    html = html.replace(/^- (.*?)$/gm, '<li style="margin-left: 1rem; list-style-type: disc; margin-bottom: 0.25rem;">$1</li>');
+    
+    // Paragraph spacing
+    html = html.split('\n').map(line => {
+      if (line.trim().startsWith('<h') || line.trim().startsWith('<div') || line.trim().startsWith('<li')) {
+        return line;
+      }
+      return line.trim() ? `<p style="margin-bottom: 0.75rem; font-size: 0.925rem; line-height: 1.6;">${line}</p>` : '';
+    }).join('\n');
+    
+    return html;
   };
 
   // Helper: Load Jitsi API script
@@ -386,6 +467,63 @@ export default function MeetingRoom({ meetId, onLeave }) {
       setPrevWaitingCount(waitingCount);
     });
   }, [waitingGuests, isHost, prevWaitingCount]);
+
+  // Chat Polling Effect
+  useEffect(() => {
+    if (inLobby) return;
+
+    const fetchChatMessages = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/bookings/${meetId}/chat`);
+        if (res.ok) {
+          const data = await res.json();
+          setChatMessages(prev => {
+            if (activeTab !== 'chat' && data.length > prev.length) {
+              setUnreadChatCount(count => count + (data.length - prev.length));
+            }
+            return data;
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch chat messages:', err);
+      }
+    };
+
+    fetchChatMessages();
+    const interval = setInterval(fetchChatMessages, 2000);
+    return () => clearInterval(interval);
+  }, [inLobby, meetId, activeTab]);
+
+  // Reset unread count when switching to chat tab
+  useEffect(() => {
+    if (activeTab === 'chat') {
+      setUnreadChatCount(0);
+    }
+  }, [activeTab]);
+
+  const handleSendChatMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessageText.trim()) return;
+
+    const senderName = isHost ? 'Advisor' : (name || 'Client');
+    const textToSend = newMessageText.trim();
+    setNewMessageText(''); // Clear input immediately for responsiveness
+
+    try {
+      const res = await fetch(`${apiBaseUrl}/bookings/${meetId}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sender: senderName, text: textToSend })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setChatMessages(prev => [...prev, data.message]);
+      }
+    } catch (err) {
+      console.error('Failed to send chat message:', err);
+      alert('Could not send message. Please try again.');
+    }
+  };
 
   // Guest checking host presence and knock status
   useEffect(() => {
@@ -744,6 +882,19 @@ export default function MeetingRoom({ meetId, onLeave }) {
                   </button>
                 )}
                 <button 
+                  onClick={() => setActiveTab('chat')}
+                  className={`tab-btn ${activeTab === 'chat' ? 'active' : ''}`}
+                  style={{ position: 'relative' }}
+                >
+                  <MessageSquare size={16} />
+                  <span>Chat</span>
+                  {unreadChatCount > 0 && (
+                    <span className="badge-notification">
+                      {unreadChatCount}
+                    </span>
+                  )}
+                </button>
+                <button 
                   onClick={() => setActiveTab('roadmap')}
                   className={`tab-btn ${activeTab === 'roadmap' ? 'active' : ''}`}
                 >
@@ -768,6 +919,47 @@ export default function MeetingRoom({ meetId, onLeave }) {
 
               <div className="sidebar-content">
                 
+                {/* Tab: Live Chat */}
+                {activeTab === 'chat' && (
+                  <div className="chat-container">
+                    <h4 style={{ color: '#fff', fontSize: '0.85rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Session Live Chat
+                    </h4>
+                    <div className="chat-messages-list">
+                      {chatMessages.length === 0 ? (
+                        <div className="chat-empty-state">
+                          No messages yet. Send a message to start!
+                        </div>
+                      ) : (
+                        chatMessages.map((msg, idx) => {
+                          const isMe = msg.sender === (isHost ? 'Advisor' : (name || 'Client'));
+                          return (
+                            <div key={idx} className={`chat-bubble-wrapper ${isMe ? 'chat-me' : 'chat-other'}`}>
+                              <div className="chat-bubble-sender">{msg.sender}</div>
+                              <div className="chat-bubble-content">{msg.text}</div>
+                              <div className="chat-bubble-time">
+                                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                    <form onSubmit={handleSendChatMessage} className="chat-input-row">
+                      <input
+                        type="text"
+                        value={newMessageText}
+                        onChange={(e) => setNewMessageText(e.target.value)}
+                        placeholder="Type a message..."
+                        className="chat-input"
+                      />
+                      <button type="submit" className="btn btn-primary chat-btn-send">
+                        Send
+                      </button>
+                    </form>
+                  </div>
+                )}
+
                 {/* Tab: Lobby waiting guests list (Host only) */}
                 {activeTab === 'lobby' && isHost && (
                   <div className="lobby-requests-container">
@@ -879,15 +1071,50 @@ export default function MeetingRoom({ meetId, onLeave }) {
                 {/* Tab 2: Session Notes */}
                 {activeTab === 'notes' && (
                   <div className="notes-container">
-                    <h4 style={{ color: '#fff', fontSize: '0.85rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Consultation Workspace Draft
-                    </h4>
-                    <textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Document client revenue details, bottlenecks, goals, and customized session takeaways here..."
-                      className="notes-textarea"
-                    ></textarea>
+                    <div className="notes-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <h4 style={{ color: '#fff', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
+                        Session Notes Draft
+                      </h4>
+                      <div className="notes-toggle-buttons">
+                        <button 
+                          type="button"
+                          onClick={() => setNotesEditMode('write')}
+                          className={`notes-toggle-btn ${notesEditMode === 'write' ? 'active' : ''}`}
+                        >
+                          Write
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setNotesEditMode('preview')}
+                          className={`notes-toggle-btn ${notesEditMode === 'preview' ? 'active' : ''}`}
+                        >
+                          Preview
+                        </button>
+                      </div>
+                    </div>
+
+                    {notesEditMode === 'write' ? (
+                      <>
+                        <div className="notes-markdown-toolbar">
+                          <button type="button" onClick={() => insertMarkdown('bold', 'bold text')} title="Bold">B</button>
+                          <button type="button" onClick={() => insertMarkdown('italic', 'italic text')} title="Italic">I</button>
+                          <button type="button" onClick={() => insertMarkdown('heading', 'Heading')} title="Heading">H</button>
+                          <button type="button" onClick={() => insertMarkdown('list', 'Task')} title="Task List">Task</button>
+                        </div>
+                        <textarea
+                          ref={notesTextareaRef}
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                          placeholder="Document client details, bottlenecks, and customized takeaways (supports Markdown)..."
+                          className="notes-textarea"
+                        ></textarea>
+                      </>
+                    ) : (
+                      <div 
+                        className="notes-preview-container"
+                        dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(notes) }}
+                      ></div>
+                    )}
 
                     <div className="notes-actions">
                       <button 
