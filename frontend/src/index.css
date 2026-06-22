@@ -929,8 +929,257 @@ img {
   pointer-events: none;
 }
 
+/* Courses Section */
+.courses-section {
+  padding: 8rem 0;
+  background-color: var(--bg-dark);
+  position: relative;
+  overflow: hidden;
+}
+
+.courses-section::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(0, 123, 255, 0.05) 0%, transparent 70%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.courses-section::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  left: -5%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 78, 38, 0.04) 0%, transparent 70%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.courses-header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 4rem auto;
+  position: relative;
+  z-index: 2;
+}
+
+.courses-title {
+  font-size: clamp(2.25rem, 4vw, 2.75rem);
+  color: var(--text-dark);
+  margin-top: 1rem;
+}
+
+.courses-subtitle {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-top: 1rem;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* Course Card styling */
+.course-card {
+  background: var(--bg-dark-card);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: var(--border-radius-md);
+  padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  transition: var(--transition);
+  overflow: hidden;
+}
+
+.course-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  transition: var(--transition);
+}
+
+.course-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+/* Custom styles for each course type */
+.course-card.cybersecurity::before { background: var(--color-blue-brand); }
+.course-card.cybersecurity:hover { box-shadow: 0 20px 40px rgba(0, 123, 255, 0.1), var(--shadow-blue-glow); }
+
+.course-card.aimarketing::before { background: var(--color-orange-brand); }
+.course-card.aimarketing:hover { box-shadow: 0 20px 40px rgba(255, 78, 38, 0.1), var(--shadow-orange-glow); }
+
+.course-card.datascience::before { background: var(--color-yellow-accent); }
+.course-card.datascience:hover { box-shadow: 0 20px 40px rgba(255, 209, 59, 0.1), var(--shadow-yellow-glow); }
+
+.course-card.webdev::before { background: var(--color-blue-brand); }
+.course-card.webdev:hover { box-shadow: 0 20px 40px rgba(0, 123, 255, 0.1), var(--shadow-blue-glow); }
+
+.course-card.design::before { background: var(--color-orange-brand); }
+.course-card.design:hover { box-shadow: 0 20px 40px rgba(255, 78, 38, 0.1), var(--shadow-orange-glow); }
+
+/* Header Elements in Card */
+.course-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.course-icon-container {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.cybersecurity .course-icon-container { background: rgba(0, 123, 255, 0.08); color: var(--color-blue-brand); }
+.aimarketing .course-icon-container { background: rgba(255, 78, 38, 0.08); color: var(--color-orange-brand); }
+.datascience .course-icon-container { background: rgba(255, 209, 59, 0.1); color: #d97706; }
+.webdev .course-icon-container { background: rgba(0, 123, 255, 0.08); color: var(--color-blue-brand); }
+.design .course-icon-container { background: rgba(255, 78, 38, 0.08); color: var(--color-orange-brand); }
+
+.course-badge {
+  background: var(--bg-dark);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  color: var(--text-muted);
+}
+
+.course-card.aimarketing .course-badge {
+  background: rgba(255, 78, 38, 0.08);
+  color: var(--color-orange-brand);
+  border-color: rgba(255, 78, 38, 0.2);
+}
+
+.course-card.cybersecurity .course-badge {
+  background: rgba(0, 123, 255, 0.08);
+  color: var(--color-blue-brand);
+  border-color: rgba(0, 123, 255, 0.2);
+}
+
+.course-card.datascience .course-badge {
+  background: rgba(255, 209, 59, 0.1);
+  color: #d97706;
+  border-color: rgba(255, 209, 59, 0.2);
+}
+
+.course-card.webdev .course-badge {
+  background: rgba(0, 123, 255, 0.08);
+  color: var(--color-blue-brand);
+  border-color: rgba(0, 123, 255, 0.2);
+}
+
+.course-card.design .course-badge {
+  background: rgba(255, 78, 38, 0.08);
+  color: var(--color-orange-brand);
+  border-color: rgba(255, 78, 38, 0.2);
+}
+
+/* Body Elements in Card */
+.course-card h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0.75rem;
+}
+
+.course-card p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+/* Skills List in Card */
+.course-skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+  border-top: 1px dashed rgba(15, 23, 42, 0.08);
+  padding-top: 1.25rem;
+}
+
+.course-skill-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+  color: var(--text-dark);
+}
+
+.course-skill-item svg {
+  color: var(--color-blue-brand);
+  flex-shrink: 0;
+}
+
+.course-card.aimarketing .course-skill-item svg { color: var(--color-orange-brand); }
+.course-card.datascience .course-skill-item svg { color: #d97706; }
+.course-card.webdev .course-skill-item svg { color: var(--color-blue-brand); }
+.course-card.design .course-skill-item svg { color: var(--color-orange-brand); }
+
+/* Learn More / Arrow Link */
+.course-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-blue-brand);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: auto;
+}
+
+.course-card.cybersecurity .course-action-link { color: var(--color-blue-brand); }
+.course-card.aimarketing .course-action-link { color: var(--color-orange-brand); }
+.course-card.datascience .course-action-link { color: #d97706; }
+.course-card.webdev .course-action-link { color: var(--color-blue-brand); }
+.course-card.design .course-action-link { color: var(--color-orange-brand); }
+
+.course-action-link:hover {
+  gap: 0.8rem;
+}
+
 /* Responsive Styles */
 @media (max-width: 1024px) {
+  .courses-section {
+    padding: 6rem 0;
+  }
+
+  .courses-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
   .about-us-section {
     padding: 7rem 0 4rem 0;
   }
@@ -977,6 +1226,15 @@ img {
 }
 
 @media (max-width: 768px) {
+  .courses-section {
+    padding: 5rem 0;
+  }
+
+  .courses-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
   .about-metrics-grid {
     grid-template-columns: 1fr;
     gap: 1.25rem;

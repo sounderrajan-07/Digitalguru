@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, ArrowRight, Shield, Video, Phone, Award, CheckCircle, GraduationCap, Briefcase, MapPin } from 'lucide-react';
+import { Mail, ArrowRight, Shield, Video, Phone, Award, CheckCircle, GraduationCap, Briefcase, MapPin, Brain, Database, Code, Palette } from 'lucide-react';
 import MeetingRoom from './components/MeetingRoom';
 import AdminDashboard from './components/AdminDashboard';
 
@@ -124,6 +124,7 @@ export default function App() {
           </a>
           <ul className={`nav-menu ${menuActive ? 'active' : ''}`}>
             <li><a href="#about" className="nav-link" onClick={closeMobileMenu}>About Us</a></li>
+            <li><a href="#courses" className="nav-link" onClick={closeMobileMenu}>Courses Offered</a></li>
             <li><a href="#join-session" className="nav-link" onClick={closeMobileMenu}>Join Session</a></li>
             <li><a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); navigateToAdmin(); closeMobileMenu(); }}>Host Console</a></li>
           </ul>
@@ -223,6 +224,180 @@ export default function App() {
         </div>
       </section>
 
+      {/* Courses Section */}
+      <section id="courses" className="courses-section">
+        <div className="container">
+          <div className="courses-header">
+            <div className="premium-badge">
+              <span className="badge-pulse"></span> Our Specialized Courses
+            </div>
+            <h2 className="courses-title">
+              Elevate Your Skills with <span className="text-glow">In-Demand Programs</span>
+            </h2>
+            <p className="courses-subtitle">
+              Choose from our curated courses designed to align with today's job market. All programs are integrated with AI productivity tools and led by industry experts.
+            </p>
+          </div>
+
+          <div className="courses-grid">
+            {/* Cyber Security */}
+            <div className="course-card cybersecurity">
+              <div className="course-card-header">
+                <div className="course-icon-container">
+                  <Shield size={28} />
+                </div>
+                <span className="course-badge">Featured</span>
+              </div>
+              <h3>Cyber Security</h3>
+              <p>
+                Master the techniques to protect digital infrastructure. Learn ethical hacking, vulnerability assessment, threat intelligence, and network defense strategies.
+              </p>
+              <div className="course-skills-list">
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Ethical Hacking & Penetration Testing</span>
+                </div>
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Network & Cloud Security</span>
+                </div>
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Threat Intelligence & Incident Response</span>
+                </div>
+              </div>
+              <a href="#join-session" className="course-action-link">
+                Learn More <ArrowRight size={16} />
+              </a>
+            </div>
+
+            {/* AI Marketing */}
+            <div className="course-card aimarketing">
+              <div className="course-card-header">
+                <div className="course-icon-container">
+                  <Brain size={28} />
+                </div>
+                <span className="course-badge">AI-Powered</span>
+              </div>
+              <h3>AI Marketing</h3>
+              <p>
+                Revolutionize your marketing campaigns. Harness generative AI, master prompt engineering, and deploy automated marketing funnels to scale conversions.
+              </p>
+              <div className="course-skills-list">
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Generative AI Tools & Prompting</span>
+                </div>
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Growth Hacking & Copywriting</span>
+                </div>
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Automated Funnel Optimization</span>
+                </div>
+              </div>
+              <a href="#join-session" className="course-action-link">
+                Learn More <ArrowRight size={16} />
+              </a>
+            </div>
+
+            {/* Data Science */}
+            <div className="course-card datascience">
+              <div className="course-card-header">
+                <div className="course-icon-container">
+                  <Database size={28} />
+                </div>
+                <span className="course-badge">High Demand</span>
+              </div>
+              <h3>Data Science</h3>
+              <p>
+                Unlock insights from complex data structures. Learn Python programming, SQL databases, data visualization, and predictive machine learning models.
+              </p>
+              <div className="course-skills-list">
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Python & SQL Data Wrangling</span>
+                </div>
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Machine Learning & AI Modeling</span>
+                </div>
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Data Visualization & PowerBI</span>
+                </div>
+              </div>
+              <a href="#join-session" className="course-action-link">
+                Learn More <ArrowRight size={16} />
+              </a>
+            </div>
+
+            {/* Web Development */}
+            <div className="course-card webdev">
+              <div className="course-card-header">
+                <div className="course-icon-container">
+                  <Code size={28} />
+                </div>
+                <span className="course-badge">Full-Stack</span>
+              </div>
+              <h3>Web Development</h3>
+              <p>
+                Construct modern, high-performance web applications. Master responsive frontend structures, backend servers, database systems, and robust APIs.
+              </p>
+              <div className="course-skills-list">
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>React.js & Modern Frontend</span>
+                </div>
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Node.js & Backend Architecture</span>
+                </div>
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>RESTful APIs & Database Systems</span>
+                </div>
+              </div>
+              <a href="#join-session" className="course-action-link">
+                Learn More <ArrowRight size={16} />
+              </a>
+            </div>
+
+            {/* Creative Design */}
+            <div className="course-card design">
+              <div className="course-card-header">
+                <div className="course-icon-container">
+                  <Palette size={28} />
+                </div>
+                <span className="course-badge">UI/UX</span>
+              </div>
+              <h3>Creative Design</h3>
+              <p>
+                Bring concepts to life with stunning interfaces. Master UI/UX wireframing in Figma, visual brand identity guidelines, and graphic design fundamentals.
+              </p>
+              <div className="course-skills-list">
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Figma UI/UX Prototyping</span>
+                </div>
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Graphic Design & Typography</span>
+                </div>
+                <div className="course-skill-item">
+                  <CheckCircle size={16} />
+                  <span>Design Systems & User Testing</span>
+                </div>
+              </div>
+              <a href="#join-session" className="course-action-link">
+                Learn More <ArrowRight size={16} />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Hero / Join Call Portal Section */}
       <main id="join-session" className="portal-hero" style={{ paddingTop: '6rem', paddingBottom: '7.5rem' }}>
         <div className="container">
@@ -288,6 +463,7 @@ export default function App() {
               <h4 className="footer-links-title">Quick Links</h4>
               <ul className="footer-links">
                 <li><a href="#about" className="footer-link">About Us</a></li>
+                <li><a href="#courses" className="footer-link">Courses Offered</a></li>
                 <li><a href="#join-session" className="footer-link">Join Session</a></li>
                 <li><a href="#" onClick={(e) => { e.preventDefault(); navigateToAdmin(); }} className="footer-link">Host Console</a></li>
               </ul>
