@@ -1337,7 +1337,7 @@ img {
 
   .nav-logo {
     position: absolute;
-    left: 30%;
+    left: 20%;
     transform: translateX(-50%);
     z-index: 1001;
   }
